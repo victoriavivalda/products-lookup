@@ -1,0 +1,20 @@
+@layer base {
+  :root {
+    --campaign-badge: "Holiday & Christmas Sales";
+    --accent-primary: oklch(0.48 0.19 25); /* Rojo carmesí editorial */
+    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
+    --surface-canvas: oklch(0.99 0.006 90); /* Marfil sutil */
+    --surface-subtle: oklch(0.965 0.01 90);
+    --text-primary: oklch(0.18 0.03 155); /* Verde pino ultra oscuro */
+    --radius-card: 0.75rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-canvas: oklch(0.14 0.02 155); /* Verde bosque profundo */
+      --surface-subtle: oklch(0.18 0.025 155);
+      --text-primary: oklch(0.96 0.01 90);
+      --accent-primary: oklch(0.66 0.18 25);
+    }
+  }
+}

@@ -1,0 +1,20 @@
+@layer base {
+  :root {
+    --campaign-badge: "4th of July Retail Monitor";
+    --accent-primary: oklch(0.45 0.18 260); /* Azul cobalto editorial */
+    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
+    --surface-canvas: var(--raw-white);
+    --surface-subtle: oklch(0.975 0.008 255);
+    --text-primary: oklch(0.16 0.03 260);
+    --radius-card: 0.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-canvas: oklch(0.13 0.025 260);
+      --surface-subtle: oklch(0.17 0.03 260);
+      --text-primary: var(--raw-white);
+      --accent-primary: oklch(0.68 0.16 255);
+    }
+  }
+}

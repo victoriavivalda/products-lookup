@@ -1,0 +1,13 @@
+@layer base {
+  :root {
+    /* Superficies y tintas base */
+    --raw-white: oklch(1 0 0);
+    --raw-snow: oklch(0.985 0.002 260);
+    --raw-obsidian: oklch(0.13 0.005 285);
+    --raw-charcoal: oklch(0.17 0.006 285);
+
+    /* Escala tipográfica fluida (responde al zoom del navegador y al viewport) */
+    --fluid-h1: clamp(1.5rem, 2.2vw + 1rem, 2.35rem);
+    --fluid-body: clamp(0.875rem, 0.2vw + 0.82rem, 1rem);
+  }
+}
