@@ -1,0 +1,68 @@
+@layer components {
+  :root {
+    --text-muted: color-mix(in oklch, var(--text-primary) 56%, transparent);
+    --border-hairline: color-mix(in oklch, var(--text-primary) 9%, transparent);
+    --border-hover: color-mix(in oklch, var(--text-primary) 22%, transparent);
+    --motion-duration: 180ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-duration: 0ms;
+    }
+  }
+
+  .pl-card {
+    background-color: var(--surface-canvas);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-card);
+    padding: 1.25rem;
+    transition: border-color var(--motion-duration) cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .pl-card:hover {
+    border-color: var(--border-hover);
+  }
+
+  .pl-accent-pill {
+    background-color: var(--accent-surface);
+    color: var(--accent-primary);
+    border: 1px solid color-mix(in oklch, var(--accent-primary) 25%, transparent);
+  }
+
+  [data-campaign="christmas"] {
+    --campaign-badge: "Holiday & Christmas Sales";
+    --accent-primary: oklch(0.48 0.19 25);
+    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
+    --surface-canvas: oklch(0.99 0.006 90);
+    --surface-subtle: oklch(0.965 0.01 90);
+    --text-primary: oklch(0.18 0.03 155);
+    --radius-card: 0.75rem;
+  }
+
+  [data-campaign="july4"] {
+    --campaign-badge: "4th of July Retail Monitor";
+    --accent-primary: oklch(0.45 0.18 260);
+    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
+    --surface-canvas: oklch(1 0 0);
+    --surface-subtle: oklch(0.975 0.008 255);
+    --text-primary: oklch(0.16 0.03 260);
+    --radius-card: 0.5rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-campaign="christmas"] {
+      --surface-canvas: oklch(0.14 0.02 155);
+      --surface-subtle: oklch(0.18 0.025 155);
+      --text-primary: oklch(0.96 0.01 90);
+      --accent-primary: oklch(0.66 0.18 25);
+    }
+
+    [data-campaign="july4"] {
+      --surface-canvas: oklch(0.13 0.025 260);
+      --surface-subtle: oklch(0.17 0.03 260);
+      --text-primary: oklch(1 0 0);
+      --accent-primary: oklch(0.68 0.16 255);
+    }
+  }
+}
