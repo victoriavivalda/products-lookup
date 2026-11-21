@@ -1,19 +1,11 @@
-import {
-  AIProviderAdapter,
-  ChatGPTAdapter,
-  ClaudeAdapter,
-  GeminiAdapter,
-} from "../adapters/ai-providers.adapter";
+import { AIProviderFactory } from "../adapters/ai-provider.factory";
+import { AIProviderStrategy } from "../adapters/ai-provider.strategy";
 import { AIProviderResponse, ExecutiveConclusion } from "../domain/lookup.types";
 
 class LookupFacade {
-  private adapters: AIProviderAdapter[] = [
-    new GeminiAdapter(),
-    new ChatGPTAdapter(),
-    new ClaudeAdapter(),
-  ];
+  private adapters: AIProviderStrategy[] = AIProviderFactory.createAll();
 
-  getAdapters(): AIProviderAdapter[] {
+  getAdapters(): AIProviderStrategy[] {
     return this.adapters;
   }
 

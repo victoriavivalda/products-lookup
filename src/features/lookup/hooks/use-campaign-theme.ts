@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
+import {
+  CAMPAIGN_LABELS,
+  CAMPAIGN_THEMES,
+  CampaignTheme,
+  UI_CONFIG,
+} from "@/core/constants/lookup.constants";
 
-export type CampaignTheme = "black-friday" | "christmas" | "july4";
-
-export const CAMPAIGN_LABELS: Record<CampaignTheme, string> = {
-  "black-friday": "Black Friday Telemetry",
-  christmas: "Christmas Sales",
-  july4: "4th of July Monitor",
-};
-
-export function useCampaignTheme(initialTheme: CampaignTheme = "black-friday") {
+export function useCampaignTheme(
+  initialTheme: CampaignTheme = CAMPAIGN_THEMES.BLACK_FRIDAY
+) {
   const [campaign, setCampaign] = useState<CampaignTheme>(initialTheme);
 
   useEffect(() => {
-    if (campaign === "black-friday") {
-      document.documentElement.removeAttribute("data-campaign");
+    if (campaign === CAMPAIGN_THEMES.BLACK_FRIDAY) {
+      document.documentElement.removeAttribute(UI_CONFIG.DOM_THEME_ATTRIBUTE);
     } else {
-      document.documentElement.setAttribute("data-campaign", campaign);
+      document.documentElement.setAttribute(UI_CONFIG.DOM_THEME_ATTRIBUTE, campaign);
     }
   }, [campaign]);
 

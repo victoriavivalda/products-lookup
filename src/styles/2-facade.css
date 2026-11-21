@@ -1,4 +1,4 @@
-@layer components {
+@layer base {
   :root {
     --text-muted: color-mix(in oklch, var(--text-primary) 56%, transparent);
     --border-hairline: color-mix(in oklch, var(--text-primary) 9%, transparent);
@@ -12,6 +12,42 @@
     }
   }
 
+  [data-campaign="christmas"] {
+    --surface-canvas: var(--xmas-light-canvas);
+    --surface-subtle: var(--xmas-light-subtle);
+    --text-primary: var(--xmas-light-text);
+    --accent-primary: var(--xmas-light-accent);
+    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
+    --radius-card: var(--xmas-radius);
+  }
+
+  [data-campaign="july4"] {
+    --surface-canvas: var(--july4-light-canvas);
+    --surface-subtle: var(--july4-light-subtle);
+    --text-primary: var(--july4-light-text);
+    --accent-primary: var(--july4-light-accent);
+    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
+    --radius-card: var(--july4-radius);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-campaign="christmas"] {
+      --surface-canvas: var(--xmas-dark-canvas);
+      --surface-subtle: var(--xmas-dark-subtle);
+      --text-primary: var(--xmas-dark-text);
+      --accent-primary: var(--xmas-dark-accent);
+    }
+
+    [data-campaign="july4"] {
+      --surface-canvas: var(--july4-dark-canvas);
+      --surface-subtle: var(--july4-dark-subtle);
+      --text-primary: var(--july4-dark-text);
+      --accent-primary: var(--july4-dark-accent);
+    }
+  }
+}
+
+@layer components {
   .pl-card {
     background-color: var(--surface-canvas);
     border: 1px solid var(--border-hairline);
@@ -30,39 +66,23 @@
     border: 1px solid color-mix(in oklch, var(--accent-primary) 25%, transparent);
   }
 
-  [data-campaign="christmas"] {
-    --campaign-badge: "Holiday & Christmas Sales";
-    --accent-primary: oklch(0.48 0.19 25);
-    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
-    --surface-canvas: oklch(0.99 0.006 90);
-    --surface-subtle: oklch(0.965 0.01 90);
-    --text-primary: oklch(0.18 0.03 155);
-    --radius-card: 0.75rem;
+  @keyframes pl-shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 
-  [data-campaign="july4"] {
-    --campaign-badge: "4th of July Retail Monitor";
-    --accent-primary: oklch(0.45 0.18 260);
-    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
-    --surface-canvas: oklch(1 0 0);
-    --surface-subtle: oklch(0.975 0.008 255);
-    --text-primary: oklch(0.16 0.03 260);
-    --radius-card: 0.5rem;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    [data-campaign="christmas"] {
-      --surface-canvas: oklch(0.14 0.02 155);
-      --surface-subtle: oklch(0.18 0.025 155);
-      --text-primary: oklch(0.96 0.01 90);
-      --accent-primary: oklch(0.66 0.18 25);
-    }
-
-    [data-campaign="july4"] {
-      --surface-canvas: oklch(0.13 0.025 260);
-      --surface-subtle: oklch(0.17 0.03 260);
-      --text-primary: oklch(1 0 0);
-      --accent-primary: oklch(0.68 0.16 255);
-    }
+  .pl-skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--surface-subtle) 25%,
+      color-mix(in oklch, var(--text-primary) 6%, var(--surface-subtle)) 50%,
+      var(--surface-subtle) 75%
+    );
+    background-size: 200% 100%;
+    animation: pl-shimmer 1.6s infinite linear;
   }
 }

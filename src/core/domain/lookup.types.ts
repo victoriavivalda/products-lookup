@@ -1,4 +1,6 @@
-export type AIModelId = "gemini" | "chatgpt" | "claude";
+import { AIModelId, ExecutionForceMode } from "../constants/lookup.constants";
+
+export type { AIModelId };
 
 export interface ProductCitation {
   id: string;
@@ -28,4 +30,14 @@ export interface ExecutiveConclusion {
   priceDiscrepanciesCount: number;
   insights: string[];
   recommendedAction: string;
+}
+
+export interface LookupRequestPayload {
+  modelId: AIModelId;
+  query: string;
+  forceMode?: ExecutionForceMode;
+}
+
+export interface LookupErrorResponse {
+  error: string;
 }

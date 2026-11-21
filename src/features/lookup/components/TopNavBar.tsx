@@ -1,5 +1,5 @@
+import { CAMPAIGN_LABELS, CampaignTheme } from "@/core/constants/lookup.constants";
 import { Palette } from "lucide-react";
-import { CAMPAIGN_LABELS, CampaignTheme } from "../hooks/use-campaign-theme";
 
 interface TopNavBarProps {
   campaign: CampaignTheme;

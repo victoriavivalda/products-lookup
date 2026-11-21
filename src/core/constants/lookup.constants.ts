@@ -1,0 +1,100 @@
+export const AI_MODELS = {
+  GEMINI: "gemini",
+  CHATGPT: "chatgpt",
+  CLAUDE: "claude",
+} as const;
+
+export type AIModelId = (typeof AI_MODELS)[keyof typeof AI_MODELS];
+
+export const AI_MODEL_LABELS: Record<AIModelId, string> = {
+  [AI_MODELS.GEMINI]: "Google AI Overviews",
+  [AI_MODELS.CHATGPT]: "ChatGPT Shopping",
+  [AI_MODELS.CLAUDE]: "Claude Search",
+};
+
+export const PROVIDER_MODES = {
+  MOCK: "mock",
+  LIVE: "live",
+  AUTO: "auto",
+} as const;
+
+export type ProviderMode = (typeof PROVIDER_MODES)[keyof typeof PROVIDER_MODES];
+
+export const EXECUTION_FORCE_MODES = {
+  LIVE: "live",
+  MOCK: "mock",
+} as const;
+
+export type ExecutionForceMode =
+  (typeof EXECUTION_FORCE_MODES)[keyof typeof EXECUTION_FORCE_MODES];
+
+export const CAMPAIGN_THEMES = {
+  BLACK_FRIDAY: "black-friday",
+  CHRISTMAS: "christmas",
+  JULY_4: "july4",
+} as const;
+
+export type CampaignTheme =
+  (typeof CAMPAIGN_THEMES)[keyof typeof CAMPAIGN_THEMES];
+
+export const CAMPAIGN_LABELS: Record<CampaignTheme, string> = {
+  [CAMPAIGN_THEMES.BLACK_FRIDAY]: "Black Friday · Live Retail",
+  [CAMPAIGN_THEMES.CHRISTMAS]: "Holiday Season · Editorial",
+  [CAMPAIGN_THEMES.JULY_4]: "4th of July · Summer Retail",
+};
+
+export const CAMPAIGN_PRESET_PROMPTS: Record<CampaignTheme, string[]> = {
+  [CAMPAIGN_THEMES.BLACK_FRIDAY]: [
+    "best noise cancelling headphones",
+    "4k oled gaming monitor deals",
+    "espresso machine under 500",
+  ],
+  [CAMPAIGN_THEMES.CHRISTMAS]: [
+    "cashmere gift throw blanket",
+    "pour-over coffee gift set",
+    "wireless turntable walnut",
+  ],
+  [CAMPAIGN_THEMES.JULY_4]: [
+    "portable charcoal grill stainless",
+    "insulated cooler 45qt",
+    "outdoor bluetooth speaker waterproof",
+  ],
+};
+
+export const API_ENDPOINTS = {
+  LOOKUP: "/api/lookup",
+  SEND_REPORT: "/api/report/send",
+} as const;
+
+export const QUERY_KEYS = {
+  PRODUCTS_LOOKUP: "products-lookup",
+} as const;
+
+export const UI_CONFIG = {
+  SEARCH_DEBOUNCE_MS: 450,
+  CACHE_STALE_TIME_MS: 60_000,
+  DOM_THEME_ATTRIBUTE: "data-campaign",
+} as const;
+
+export const AI_ENV_KEYS: Record<AIModelId, string> = {
+  [AI_MODELS.GEMINI]: "GEMINI_API_KEY",
+  [AI_MODELS.CHATGPT]: "OPENAI_API_KEY",
+  [AI_MODELS.CLAUDE]: "ANTHROPIC_API_KEY",
+};
+
+export const EMAIL_DISPATCH_STATUS = {
+  IDLE: "idle",
+  SENDING: "sending",
+  SENT: "sent",
+  ERROR: "error",
+} as const;
+
+export type EmailDispatchStatus =
+  (typeof EMAIL_DISPATCH_STATUS)[keyof typeof EMAIL_DISPATCH_STATUS];
+
+export const REPORT_MODES = {
+  LIVE: "live",
+  SIMULATED: "simulated",
+} as const;
+
+export type ReportMode = (typeof REPORT_MODES)[keyof typeof REPORT_MODES];

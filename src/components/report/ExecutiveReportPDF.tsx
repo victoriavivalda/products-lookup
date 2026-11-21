@@ -39,7 +39,7 @@ export function ExecutiveReportPDF({
           <Text style={styles.kicker}>Products Lookup · AI Shelf Telemetry</Text>
           <Text style={styles.title}>Executive Visibility Report</Text>
           <Text style={styles.meta}>
-            Prompt: "{conclusion.query}" · Generated: {conclusion.generatedAt}
+            {`Prompt: "${conclusion.query}" · Generated: ${conclusion.generatedAt}`}
           </Text>
         </View>
 

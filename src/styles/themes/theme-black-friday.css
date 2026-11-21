@@ -1,20 +1,19 @@
 @layer base {
   :root {
-    --campaign-badge: "Black Friday Telemetry";
-    --accent-primary: oklch(0.68 0.19 55); /* Ámbar intenso */
-    --accent-surface: color-mix(in oklch, var(--accent-primary) 10%, transparent);
-    --surface-canvas: var(--raw-white);
-    --surface-subtle: var(--raw-snow);
-    --text-primary: var(--raw-obsidian);
-    --radius-card: 0.625rem;
+    --surface-canvas: var(--bf-light-canvas);
+    --surface-subtle: var(--bf-light-subtle);
+    --text-primary: var(--bf-light-text);
+    --accent-primary: var(--bf-light-accent);
+    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
+    --radius-card: var(--bf-radius);
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --surface-canvas: var(--raw-obsidian);
-      --surface-subtle: var(--raw-charcoal);
-      --text-primary: var(--raw-white);
-      --accent-primary: oklch(0.78 0.17 65);
+      --surface-canvas: var(--bf-dark-canvas);
+      --surface-subtle: var(--bf-dark-subtle);
+      --text-primary: var(--bf-dark-text);
+      --accent-primary: var(--bf-dark-accent);
     }
   }
 }
