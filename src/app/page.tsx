@@ -4,6 +4,8 @@ import { useState } from "react";
 import {
   CAMPAIGN_PRESET_PROMPTS,
   CAMPAIGN_THEMES,
+  SIMULATION_SCENARIOS,
+  SimulationScenario,
 } from "@/core/constants/lookup.constants";
 import { useCampaignTheme } from "@/features/lookup/hooks/use-campaign-theme";
 import { useMultiEngineLookup } from "@/features/lookup/hooks/use-multi-engine-lookup";
@@ -16,17 +18,21 @@ import { EngineTelemetryChart } from "@/features/lookup/components/EngineTelemet
 import { VisibilityMatrixChart } from "@/features/lookup/components/visibility-matrix/VisibilityMatrixChart";
 
 export default function ProductsLookupPage() {
+  const [scenario, setScenario] = useState<SimulationScenario>(
+    SIMULATION_SCENARIOS.NORMAL
+  );
   const [query, setQuery] = useState<string>("");
   const { campaign, setCampaign, label } = useCampaignTheme(
     CAMPAIGN_THEMES.BLACK_FRIDAY
   );
+
   const {
     engineSlots,
     completedResponses,
     totalEngines,
     conclusion,
     hasActiveQuery,
-  } = useMultiEngineLookup(query, campaign);
+  } = useMultiEngineLookup(query, campaign, scenario);
 
   const activePresets = CAMPAIGN_PRESET_PROMPTS[campaign];
 
@@ -37,6 +43,8 @@ export default function ProductsLookupPage() {
           campaign={campaign}
           campaignLabel={label}
           onSelectCampaign={setCampaign}
+          scenario={scenario}
+          onSelectScenario={setScenario}
         />
 
         <header className="mb-8 max-w-2xl space-y-2.5">
@@ -70,8 +78,8 @@ export default function ProductsLookupPage() {
               responses={completedResponses}
               totalEngines={totalEngines}
             />
-            
-            <div className="grid gap-6 lg:grid-cols-3">
+
+            <div className="mb-8 grid gap-6 lg:grid-cols-3">
               {engineSlots.map(({ adapter, queryState }) => (
                 <ProviderResultColumn
                   key={adapter.modelId}

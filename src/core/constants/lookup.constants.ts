@@ -98,3 +98,20 @@ export const REPORT_MODES = {
 } as const;
 
 export type ReportMode = (typeof REPORT_MODES)[keyof typeof REPORT_MODES];
+
+export const SIMULATION_SCENARIOS = {
+  NORMAL: "normal",
+  SLOW_NETWORK: "slow-network",
+  PARTIAL_OUTAGE: "partial-outage",
+  PRICE_DRIFT: "price-drift",
+} as const;
+
+export type SimulationScenario =
+  (typeof SIMULATION_SCENARIOS)[keyof typeof SIMULATION_SCENARIOS];
+
+export const SIMULATION_SCENARIO_LABELS: Record<SimulationScenario, string> = {
+  [SIMULATION_SCENARIOS.NORMAL]: "Normal",
+  [SIMULATION_SCENARIOS.SLOW_NETWORK]: "Slow Network",
+  [SIMULATION_SCENARIOS.PARTIAL_OUTAGE]: "Partial Outage",
+  [SIMULATION_SCENARIOS.PRICE_DRIFT]: "Price Drift",
+};
