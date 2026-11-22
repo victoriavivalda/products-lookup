@@ -76,14 +76,15 @@ export function buildDynamicMockCitations(
   const cleanTitle = capitalizeWords(query);
   const [primaryEdition, secondaryEdition] = CAMPAIGN_EDITIONS[campaign];
 
-  const offset =
-    modelId === AI_MODELS.GEMINI ? 0 : modelId === AI_MODELS.CHATGPT ? 1 : 2;
-
-  const firstBrand = brands[offset % brands.length];
-  const secondBrand = brands[(offset + 1) % brands.length];
+  const firstBrand = brands[0];
+  const secondBrand = brands[1];
 
   const basePrice = 129 + ((query.length * 17) % 320);
   const secondPrice = basePrice + 55;
+
+  const firstRank = modelId === AI_MODELS.CHATGPT ? 2 : 1;
+  const secondRank =
+    modelId === AI_MODELS.CHATGPT ? 1 : modelId === AI_MODELS.CLAUDE ? 3 : 2;
 
   const hasStalePrice = modelId !== AI_MODELS.CLAUDE;
   const citedSecondPrice = hasStalePrice ? secondPrice + 40 : secondPrice;
@@ -97,7 +98,7 @@ export function buildDynamicMockCitations(
       brand: firstBrand,
       realPrice: basePrice,
       citedPrice: basePrice,
-      rank: 1,
+      rank: firstRank,
       sentiment: "positive",
       sources: primarySources,
       modelId,
@@ -109,7 +110,7 @@ export function buildDynamicMockCitations(
       brand: secondBrand,
       realPrice: secondPrice,
       citedPrice: citedSecondPrice,
-      rank: modelId === AI_MODELS.CHATGPT ? 3 : 2,
+      rank: secondRank,
       sentiment: hasStalePrice ? "neutral" : "positive",
       sources: secondarySources,
       modelId,

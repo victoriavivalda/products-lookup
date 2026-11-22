@@ -12,6 +12,8 @@ import { SearchCommandBar } from "@/features/lookup/components/SearchCommandBar"
 import { ExecutiveSummaryCard } from "@/features/lookup/components/ExecutiveSummaryCard";
 import { ProviderResultColumn } from "@/features/lookup/components/ProviderResultColumn";
 import { EmptyLookupState } from "@/features/lookup/components/EmptyLookupState";
+import { EngineTelemetryChart } from "@/features/lookup/components/EngineTelemetryChart";
+import { VisibilityMatrixChart } from "@/features/lookup/components/visibility-matrix/VisibilityMatrixChart";
 
 export default function ProductsLookupPage() {
   const [query, setQuery] = useState<string>("");
@@ -68,7 +70,7 @@ export default function ProductsLookupPage() {
               responses={completedResponses}
               totalEngines={totalEngines}
             />
-
+            
             <div className="grid gap-6 lg:grid-cols-3">
               {engineSlots.map(({ adapter, queryState }) => (
                 <ProviderResultColumn
@@ -78,6 +80,9 @@ export default function ProductsLookupPage() {
                 />
               ))}
             </div>
+
+            <EngineTelemetryChart responses={completedResponses} />
+            <VisibilityMatrixChart responses={completedResponses} />
           </>
         )}
       </main>

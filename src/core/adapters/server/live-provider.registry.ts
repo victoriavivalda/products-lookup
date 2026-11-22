@@ -23,28 +23,39 @@ function buildShoppingAuditPrompt(modelName: string, query: string): string {
 Return ONLY a valid JSON array of 2 objects with keys: sku, name, brand, realPrice (number), citedPrice (number, optionally +$35 stale), rank (1-3), sentiment ("positive" | "neutral"), sources (2 domains).`;
 }
 
+const GEMINI_HOST = "https://generativelanguage.googleapis.com";
+const GEMINI_PATH = "/v1beta/models/gemini-flash-lite-latest:generateContent";
+const LIVE_TIMEOUT_MS = 8000;
+
 const GEMINI_LIVE_HANDLER: LiveProviderHandler = {
   async fetchCitations(query, apiKey) {
-    const endpoint = new URL(
-      "https://googleapis.com"
-    );
-    endpoint.searchParams.set("key", apiKey);
-
-    const res = await fetch(endpoint.toString(), {
+    const res = await fetch(`${GEMINI_HOST}${GEMINI_PATH}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
       body: JSON.stringify({
         contents: [
           { parts: [{ text: buildShoppingAuditPrompt(AI_MODEL_LABELS.gemini, query) }] },
         ],
         generationConfig: { responseMimeType: "application/json" },
       }),
+      signal: AbortSignal.timeout(LIVE_TIMEOUT_MS),
     });
 
-    if (!res.ok) throw new Error("Gemini API request failed");
+    if (!res.ok) {
+      const detail = await res.text();
+      console.error("[Gemini Error]:", res.status, detail);
+      throw new Error(`Gemini HTTP ${res.status}`);
+    }
+
     const data = await res.json();
-    const text = data.candidates?.at(0)?.content?.parts?.at(0)?.text;
-    return JSON.parse(text);
+    const text: string | undefined = data.candidates?.at(0)?.content?.parts?.at(0)?.text;
+    if (!text) throw new Error("Empty response from Gemini");
+
+    const cleaned = text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+    return JSON.parse(cleaned);
   },
 };
 

@@ -63,7 +63,11 @@ export function useReportExport(
       const res = await fetch(API_ENDPOINTS.SEND_REPORT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), conclusion }),
+        body: JSON.stringify({
+          email: email.trim(),
+          conclusion,
+          responses,
+        }),
       });
 
       const data = (await res.json().catch(() => ({}))) as { error?: string };

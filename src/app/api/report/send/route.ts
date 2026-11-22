@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { ExecutiveConclusion, LookupErrorResponse } from "@/core/domain/lookup.types";
+import {
+  AIProviderResponse,
+  ExecutiveConclusion,
+  LookupErrorResponse,
+} from "@/core/domain/lookup.types";
 import {
   dispatchExecutiveReport,
   DispatchReportResult,
@@ -9,6 +13,7 @@ import {
 interface SendReportRequest {
   email?: string;
   conclusion?: ExecutiveConclusion;
+  responses?: AIProviderResponse[];
 }
 
 export async function POST(
@@ -24,7 +29,11 @@ export async function POST(
       );
     }
 
-    const result = await dispatchExecutiveReport(body.email.trim(), body.conclusion);
+    const result = await dispatchExecutiveReport(
+      body.email.trim(),
+      body.conclusion,
+      body.responses ?? []
+    );
     return NextResponse.json(result);
   } catch (error) {
     if (error instanceof EmailDispatchError) {
