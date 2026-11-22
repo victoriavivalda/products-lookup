@@ -51,6 +51,14 @@ export function buildSmoothBezierPath(points: { x: number; y: number }[]): strin
   }, "");
 }
 
+function extractBaseProductName(name: string): string {
+  return name.split("—")[0].split("(")[0].trim();
+}
+
+function getNormalizedProductKey(brand: string, name: string): string {
+  return `${brand.toLowerCase().trim()}::${extractBaseProductName(name).toLowerCase()}`;
+}
+
 export function buildVisibilitySeries(
   responses: AIProviderResponse[]
 ): ProductSeries[] {
@@ -62,11 +70,11 @@ export function buildVisibilitySeries(
   const uniqueProducts = new Map<string, { sku: string; name: string }>();
   responses.forEach((res) => {
     res.citations.forEach((citation) => {
-      const normalizedKey = citation.name.toLowerCase().trim();
+      const normalizedKey = getNormalizedProductKey(citation.brand, citation.name);
       if (!uniqueProducts.has(normalizedKey)) {
         uniqueProducts.set(normalizedKey, {
           sku: citation.sku,
-          name: citation.name,
+          name: extractBaseProductName(citation.name),
         });
       }
     });
@@ -79,7 +87,9 @@ export function buildVisibilitySeries(
       const x = getEngineColumnX(idx);
       const match = responseByEngine
         .get(modelId)
-        ?.citations.find((c) => c.name.toLowerCase().trim() === normalizedKey);
+        ?.citations.find(
+          (c) => getNormalizedProductKey(c.brand, c.name) === normalizedKey
+        );
 
       if (!match) {
         return { modelId, x, y: null, rank: null, hasPriceMismatch: false };
