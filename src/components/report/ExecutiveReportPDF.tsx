@@ -46,7 +46,29 @@ const styles = StyleSheet.create({
     color: "#374151",
     marginBottom: 8,
   },
-  bullet: { marginBottom: 4, lineHeight: 1.4 },
+  bullet: { marginBottom: 5, lineHeight: 1.45, color: "#374151" },
+  synthesisCallout: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: "#F8FAFC",
+    borderLeftWidth: 3,
+    borderLeftColor: "#2563EB",
+    borderRadius: 4,
+  },
+  synthesisLabel: {
+    fontSize: 8,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    color: "#2563EB",
+    marginBottom: 3,
+  },
+  synthesisBody: {
+    fontSize: 9.5,
+    fontWeight: "normal",
+    lineHeight: 1.45,
+    color: "#111827",
+  },
   barRow: { marginBottom: 8 },
   barHeader: {
     flexDirection: "row",
@@ -139,15 +161,21 @@ export function ExecutiveReportPDF({
 
         {/* 1. Executive Conclusions & AI Narrative */}
         <View style={styles.section} wrap={false}>
-          <Text style={styles.sectionTitle}>Key Findings & AI Executive Synthesis</Text>
+          <Text style={styles.sectionTitle}>Key Findings</Text>
           {conclusion.insights.map((item, idx) => (
             <Text key={idx} style={styles.bullet}>
               {`• ${item}`}
             </Text>
           ))}
-          <Text style={{ marginTop: 6, fontWeight: "bold", lineHeight: 1.4 }}>
-            {narrative?.trim() || `Action: ${conclusion.recommendedAction}`}
-          </Text>
+
+          <View style={styles.synthesisCallout}>
+            <Text style={styles.synthesisLabel}>
+              {narrative?.trim() ? "AI Executive Synthesis" : "Recommended Action"}
+            </Text>
+            <Text style={styles.synthesisBody}>
+              {narrative?.trim() || conclusion.recommendedAction}
+            </Text>
+          </View>
         </View>
 
         {/* 2. Latency & Price Accuracy Chart */}

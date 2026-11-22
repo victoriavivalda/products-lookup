@@ -12,19 +12,17 @@ export function useExecutiveStream(
 
   const queryKey = conclusion?.query ?? "";
   const enginesCount = responses.length;
+  const isEnabled = Boolean(conclusion && enginesCount > 0);
 
   useEffect(() => {
-    if (!conclusion || enginesCount === 0) {
-      setStreamedText("");
-      setIsStreaming(false);
-      return;
-    }
+    if (!isEnabled || !conclusion) return;
 
     const abortController = new AbortController();
-    setStreamedText("");
-    setIsStreaming(true);
 
-    (async () => {
+    const runStream = async () => {
+      setStreamedText("");
+      setIsStreaming(true);
+
       try {
         const res = await fetch("/api/stream-brief", {
           method: "POST",
@@ -57,11 +55,16 @@ export function useExecutiveStream(
           setIsStreaming(false);
         }
       }
-    })();
+    };
+
+    void runStream();
 
     return () => abortController.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryKey, enginesCount]);
+  }, [isEnabled, queryKey, enginesCount]);
 
-  return { streamedText, isStreaming };
+  return {
+    streamedText: isEnabled ? streamedText : "",
+    isStreaming: isEnabled ? isStreaming : false,
+  };
 }
