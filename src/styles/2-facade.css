@@ -38,4 +38,22 @@
     border-color: var(--border-hover);
     box-shadow: var(--shadow-card-hover);
   }
+
+  .pl-accent-pill {
+    background-color: var(--accent-primary);
+    color: var(--accent-foreground);
+  }
+
+  .pl-skeleton {
+    background-color: var(--surface-subtle);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pl-card,
+    .pl-skeleton {
+      transition: none;
+      animation: none;
+    }
+  }
 }

@@ -11,6 +11,28 @@ import {
   UI_CONFIG,
 } from "@/core/constants/lookup.constants";
 
+function createAdapterQueryOptions(
+  adapter: SimulationDecoratorStrategy,
+  query: string,
+  campaign: CampaignTheme,
+  scenario: SimulationScenario,
+  enabled: boolean
+) {
+  return {
+    queryKey: [
+      QUERY_KEYS.PRODUCTS_LOOKUP,
+      adapter.modelId,
+      query,
+      campaign,
+      scenario,
+    ] as const,
+    queryFn: () => adapter.execute(query, campaign),
+    enabled,
+    staleTime: UI_CONFIG.CACHE_STALE_TIME_MS,
+    retry: false,
+  };
+}
+
 export function useMultiEngineLookup(
   committedQuery: string,
   campaign: CampaignTheme,
@@ -28,34 +50,40 @@ export function useMultiEngineLookup(
   );
 
   const queries = useQueries({
-    queries: adapters.map((adapter) => ({
-      queryKey: [
-        QUERY_KEYS.PRODUCTS_LOOKUP,
-        adapter.modelId,
+    queries: adapters.map((adapter) =>
+      createAdapterQueryOptions(
+        adapter,
         normalizedQuery,
         campaign,
         scenario,
-      ],
-      queryFn: () => adapter.execute(normalizedQuery, campaign),
-      enabled: hasActiveQuery,
-      staleTime: UI_CONFIG.CACHE_STALE_TIME_MS,
-      retry: false,
-    })),
+        hasActiveQuery
+      )
+    ),
   });
 
-  const engineSlots = adapters.map((adapter, index) => ({
-    adapter,
-    queryState: queries[index],
-  }));
+  // 1. Estabiliza las respuestas completadas solo cuando cambian los datos reales
+  const completedResponses = useMemo(
+    () =>
+      queries
+        .map((q) => q.data)
+        .filter((data): data is AIProviderResponse => Boolean(data)),
+    [queries]
+  );
 
-  const completedResponses = queries
-    .map((q) => q.data)
-    .filter((data): data is AIProviderResponse => Boolean(data));
+  // 2. Evita re-ejecutar synthesizeConclusions en renders no relacionados (ej. al escribir en el input)
+  const conclusion = useMemo(() => {
+    if (!hasActiveQuery || completedResponses.length === 0) return null;
+    return lookupFacade.synthesizeConclusions(normalizedQuery, completedResponses);
+  }, [hasActiveQuery, normalizedQuery, completedResponses]);
 
-  const conclusion =
-    hasActiveQuery && completedResponses.length > 0
-      ? lookupFacade.synthesizeConclusions(normalizedQuery, completedResponses)
-      : null;
+  const engineSlots = useMemo(
+    () =>
+      adapters.map((adapter, index) => ({
+        adapter,
+        queryState: queries[index],
+      })),
+    [adapters, queries]
+  );
 
   return {
     engineSlots,

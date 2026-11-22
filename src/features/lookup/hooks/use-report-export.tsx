@@ -8,7 +8,7 @@ import {
   EmailDispatchStatus,
 } from "@/core/constants/lookup.constants";
 import { AIProviderResponse, ExecutiveConclusion } from "@/core/domain/lookup.types";
-import { ExecutiveReportPDF } from "@/components/report/ExecutiveReportPDF";
+import { ExecutiveReportPDF } from "@/components/report/executive-report/ExecutiveReportPDF";
 
 export function useReportExport(
   conclusion: ExecutiveConclusion,

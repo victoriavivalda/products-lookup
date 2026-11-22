@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { AI_MODELS, AI_MODEL_LABELS } from "../constants/lookup.constants";
-import { AIProviderResponse } from "../domain/lookup.types";
-import { AIProviderStrategy, ResilientAIProviderProxy } from "./ai-provider.strategy";
+import { AI_MODEL_LABELS, AI_MODELS } from "@/core/constants/lookup.constants";
+import { AIProviderResponse } from "@/core/domain/lookup.types";
+import {
+  AIProviderStrategy,
+  ResilientAIProviderProxy,
+} from "./ai-provider.strategy";
 
 function createMockResponse(sourceTag: string): AIProviderResponse {
   return {
@@ -25,38 +28,35 @@ function createMockResponse(sourceTag: string): AIProviderResponse {
   };
 }
 
+function createStubStrategy(
+  implementation: () => Promise<AIProviderResponse>
+): AIProviderStrategy {
+  return {
+    modelId: AI_MODELS.GEMINI,
+    modelName: AI_MODEL_LABELS[AI_MODELS.GEMINI],
+    execute: vi.fn(implementation),
+  };
+}
+
 describe("ResilientAIProviderProxy", () => {
   it("returns the primary strategy response when the live provider succeeds", async () => {
-    const primary: AIProviderStrategy = {
-      modelId: AI_MODELS.GEMINI,
-      modelName: AI_MODEL_LABELS[AI_MODELS.GEMINI],
-      execute: vi.fn().mockResolvedValue(createMockResponse("live")),
-    };
-    const fallback: AIProviderStrategy = {
-      modelId: AI_MODELS.GEMINI,
-      modelName: AI_MODEL_LABELS[AI_MODELS.GEMINI],
-      execute: vi.fn().mockResolvedValue(createMockResponse("mock")),
-    };
+    const primary = createStubStrategy(async () => createMockResponse("live"));
+    const fallback = createStubStrategy(async () => createMockResponse("mock"));
 
     const proxy = new ResilientAIProviderProxy(primary, fallback);
     const result = await proxy.execute("headphones");
 
     expect(result.citations[0].id).toBe("live-1");
+    expect(result.latencyMs).toBeGreaterThanOrEqual(0);
     expect(primary.execute).toHaveBeenCalledOnce();
     expect(fallback.execute).not.toHaveBeenCalled();
   });
 
   it("transparently falls back to secondary strategy when primary throws", async () => {
-    const primary: AIProviderStrategy = {
-      modelId: AI_MODELS.GEMINI,
-      modelName: AI_MODEL_LABELS[AI_MODELS.GEMINI],
-      execute: vi.fn().mockRejectedValue(new Error("502 Bad Gateway")),
-    };
-    const fallback: AIProviderStrategy = {
-      modelId: AI_MODELS.GEMINI,
-      modelName: AI_MODEL_LABELS[AI_MODELS.GEMINI],
-      execute: vi.fn().mockResolvedValue(createMockResponse("mock")),
-    };
+    const primary = createStubStrategy(async () => {
+      throw new Error("502 Bad Gateway");
+    });
+    const fallback = createStubStrategy(async () => createMockResponse("mock"));
 
     const proxy = new ResilientAIProviderProxy(primary, fallback);
     const result = await proxy.execute("headphones");
@@ -64,5 +64,23 @@ describe("ResilientAIProviderProxy", () => {
     expect(result.citations[0].id).toBe("mock-1");
     expect(primary.execute).toHaveBeenCalledOnce();
     expect(fallback.execute).toHaveBeenCalledOnce();
+  });
+
+  it("rethrows immediately without calling fallback when request is aborted", async () => {
+    const controller = new AbortController();
+    const abortError = new DOMException("Aborted", "AbortError");
+
+    const primary = createStubStrategy(async () => {
+      controller.abort();
+      throw abortError;
+    });
+    const fallback = createStubStrategy(async () => createMockResponse("mock"));
+
+    const proxy = new ResilientAIProviderProxy(primary, fallback);
+
+    await expect(
+      proxy.execute("headphones", undefined, controller.signal)
+    ).rejects.toThrow("Aborted");
+    expect(fallback.execute).not.toHaveBeenCalled();
   });
 });

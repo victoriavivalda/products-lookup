@@ -4,8 +4,8 @@ import {
   CampaignTheme,
   SIMULATION_SCENARIOS,
   SimulationScenario,
-} from "../constants/lookup.constants";
-import { AIProviderResponse } from "../domain/lookup.types";
+} from "@/core/constants/lookup.constants";
+import { AIProviderResponse } from "@/core/domain/lookup.types";
 import { AIProviderStrategy } from "./ai-provider.strategy";
 
 const ASYMMETRIC_DELAYS_MS: Record<AIModelId, number> = {
@@ -13,6 +13,31 @@ const ASYMMETRIC_DELAYS_MS: Record<AIModelId, number> = {
   [AI_MODELS.CHATGPT]: 2100,
   [AI_MODELS.CLAUDE]: 3400,
 };
+
+const OUTAGE_TARGET_MODEL: AIModelId = AI_MODELS.CHATGPT;
+const OUTAGE_DELAY_MS = 900;
+const PRICE_DRIFT_BASE_OFFSET = 45;
+const PRICE_DRIFT_STEP_OFFSET = 15;
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) {
+    return Promise.reject(new DOMException("Aborted", "AbortError"));
+  }
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
 
 export class SimulationDecoratorStrategy implements AIProviderStrategy {
   readonly modelId: AIModelId;
@@ -28,45 +53,71 @@ export class SimulationDecoratorStrategy implements AIProviderStrategy {
 
   async execute(
     query: string,
-    campaign?: CampaignTheme
+    campaign?: CampaignTheme,
+    signal?: AbortSignal
   ): Promise<AIProviderResponse> {
-    if (this.scenario === SIMULATION_SCENARIOS.NORMAL) {
-      return this.wrapped.execute(query, campaign);
-    }
+    switch (this.scenario) {
+      case SIMULATION_SCENARIOS.NORMAL:
+        return this.wrapped.execute(query, campaign, signal);
 
-    if (this.scenario === SIMULATION_SCENARIOS.SLOW_NETWORK) {
-      const t0 = performance.now();
-      await new Promise((r) => setTimeout(r, ASYMMETRIC_DELAYS_MS[this.modelId]));
-      const response = await this.wrapped.execute(query, campaign);
-      return {
-        ...response,
-        latencyMs: Math.round(performance.now() - t0),
-      };
-    }
+      case SIMULATION_SCENARIOS.SLOW_NETWORK:
+        return this.executeSlowNetwork(query, campaign, signal);
 
-    if (
-      this.scenario === SIMULATION_SCENARIOS.PARTIAL_OUTAGE &&
-      this.modelId === AI_MODELS.CHATGPT
-    ) {
-      await new Promise((r) => setTimeout(r, 900));
+      case SIMULATION_SCENARIOS.PARTIAL_OUTAGE:
+        return this.executePartialOutage(query, campaign, signal);
+
+      case SIMULATION_SCENARIOS.PRICE_DRIFT:
+        return this.executePriceDrift(query, campaign, signal);
+    }
+  }
+
+  private async executeSlowNetwork(
+    query: string,
+    campaign?: CampaignTheme,
+    signal?: AbortSignal
+  ): Promise<AIProviderResponse> {
+    const startTime = performance.now();
+    await sleep(ASYMMETRIC_DELAYS_MS[this.modelId], signal);
+    const response = await this.wrapped.execute(query, campaign, signal);
+
+    return {
+      ...response,
+      latencyMs: Math.round(performance.now() - startTime),
+    };
+  }
+
+  private async executePartialOutage(
+    query: string,
+    campaign?: CampaignTheme,
+    signal?: AbortSignal
+  ): Promise<AIProviderResponse> {
+    if (this.modelId === OUTAGE_TARGET_MODEL) {
+      await sleep(OUTAGE_DELAY_MS, signal);
       throw new Error(
-        "Simulated 502 Bad Gateway: Upstream shopping index timed out."
+        "Simulated API Conditions 502 Bad Gateway: Upstream shopping index timed out."
       );
     }
 
-    const response = await this.wrapped.execute(query, campaign);
+    return this.wrapped.execute(query, campaign, signal);
+  }
 
-    if (this.scenario === SIMULATION_SCENARIOS.PRICE_DRIFT) {
-      return {
-        ...response,
-        citations: response.citations.map((c, idx) => ({
-          ...c,
-          citedPrice: c.realPrice + 45 + idx * 15,
-          sentiment: "neutral",
-        })),
-      };
-    }
+  private async executePriceDrift(
+    query: string,
+    campaign?: CampaignTheme,
+    signal?: AbortSignal
+  ): Promise<AIProviderResponse> {
+    const response = await this.wrapped.execute(query, campaign, signal);
 
-    return response;
+    return {
+      ...response,
+      citations: response.citations.map((citation, idx) => ({
+        ...citation,
+        citedPrice:
+          citation.realPrice +
+          PRICE_DRIFT_BASE_OFFSET +
+          idx * PRICE_DRIFT_STEP_OFFSET,
+        sentiment: "neutral",
+      })),
+    };
   }
 }

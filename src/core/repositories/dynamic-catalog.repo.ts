@@ -3,8 +3,8 @@ import {
   AIModelId,
   CAMPAIGN_THEMES,
   CampaignTheme,
-} from "../constants/lookup.constants";
-import { ProductCitation } from "../domain/lookup.types";
+} from "@/core/constants/lookup.constants";
+import { ProductCitation } from "@/core/domain/lookup.types";
 
 const BRAND_POOLS = {
   audio: ["Sony", "Bose", "Sennheiser", "Apple", "Bowers & Wilkins"],
@@ -17,19 +17,47 @@ const BRAND_POOLS = {
 
 type ProductCategory = keyof typeof BRAND_POOLS;
 
-const CAMPAIGN_EDITIONS: Record<CampaignTheme, [string, string]> = {
+const CATEGORY_KEYWORDS: ReadonlyArray<{
+  category: Exclude<ProductCategory, "default">;
+  keywords: readonly string[];
+}> = [
+  { category: "audio", keywords: ["headphone", "earbud", "audio", "turntable"] },
+  { category: "monitor", keywords: ["monitor", "oled", "keyboard"] },
+  { category: "coffee", keywords: ["espresso", "coffee", "pour-over"] },
+  { category: "summer", keywords: ["grill", "cooler", "outdoor"] },
+  { category: "holiday", keywords: ["gift", "cashmere", "blanket"] },
+];
+
+const CAMPAIGN_FALLBACK_CATEGORY: Partial<
+  Record<CampaignTheme, ProductCategory>
+> = {
+  [CAMPAIGN_THEMES.JULY_4]: "summer",
+  [CAMPAIGN_THEMES.CHRISTMAS]: "holiday",
+};
+
+const CAMPAIGN_EDITIONS: Record<CampaignTheme, readonly [string, string]> = {
   [CAMPAIGN_THEMES.BLACK_FRIDAY]: ["Doorbuster Bundle", "Flagship Edition"],
   [CAMPAIGN_THEMES.CHRISTMAS]: ["Holiday Gift Set", "Winter Atelier Edition"],
   [CAMPAIGN_THEMES.JULY_4]: ["Summer Backyard Edition", "All-Weather Pro"],
 };
 
-const SOURCES_BY_MODEL: Record<AIModelId, [string[], string[]]> = {
+const RANK_BY_MODEL: Record<AIModelId, readonly [number, number]> = {
+  [AI_MODELS.GEMINI]: [1, 2],
+  [AI_MODELS.CHATGPT]: [2, 1],
+  [AI_MODELS.CLAUDE]: [1, 3],
+};
+
+
+const SOURCES_BY_MODEL: Record<
+  AIModelId,
+  readonly [readonly string[], readonly string[]]
+> = {
   [AI_MODELS.GEMINI]: [
-    ["://nytimes.com", "rtings.com"],
+    ["nytimes.com", "rtings.com"],
     ["techradar.com", "tomsguide.com"],
   ],
   [AI_MODELS.CHATGPT]: [
-    ["://reddit.com", "theverge.com"],
+    ["reddit.com", "theverge.com"],
     ["cnet.com", "consumerreports.org"],
   ],
   [AI_MODELS.CLAUDE]: [
@@ -38,32 +66,32 @@ const SOURCES_BY_MODEL: Record<AIModelId, [string[], string[]]> = {
   ],
 };
 
-function detectCategory(query: string, campaign: CampaignTheme): ProductCategory {
-  const q = query.toLowerCase();
-  if (q.includes("headphone") || q.includes("earbud") || q.includes("audio") || q.includes("turntable")) {
-    return "audio";
-  }
-  if (q.includes("monitor") || q.includes("oled") || q.includes("keyboard")) {
-    return "monitor";
-  }
-  if (q.includes("espresso") || q.includes("coffee") || q.includes("pour-over")) {
-    return "coffee";
-  }
-  if (q.includes("grill") || q.includes("cooler") || q.includes("outdoor") || campaign === CAMPAIGN_THEMES.JULY_4) {
-    return "summer";
-  }
-  if (q.includes("gift") || q.includes("cashmere") || q.includes("blanket") || campaign === CAMPAIGN_THEMES.CHRISTMAS) {
-    return "holiday";
-  }
-  return "default";
+function detectCategory(
+  query: string,
+  campaign: CampaignTheme
+): ProductCategory {
+  const normalized = query.toLowerCase();
+  const matched = CATEGORY_KEYWORDS.find(({ keywords }) =>
+    keywords.some((kw) => normalized.includes(kw))
+  );
+
+  if (matched) return matched.category;
+  return CAMPAIGN_FALLBACK_CATEGORY[campaign] ?? "default";
 }
 
 function capitalizeWords(text: string): string {
-  return text
-    .trim()
+  const trimmed = text.trim();
+  if (!trimmed) return "Featured Product";
+
+  return trimmed
     .split(/\s+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+function buildSku(brand: string, offset: number): string {
+  const prefix = brand.replace(/[^a-zA-Z]/g, "").slice(0, 3).toUpperCase();
+  return `${prefix}-${offset}`;
 }
 
 export function buildDynamicMockCitations(
@@ -72,20 +100,14 @@ export function buildDynamicMockCitations(
   campaign: CampaignTheme = CAMPAIGN_THEMES.BLACK_FRIDAY
 ): ProductCitation[] {
   const category = detectCategory(query, campaign);
-  const brands = BRAND_POOLS[category];
+  const [firstBrand, secondBrand] = BRAND_POOLS[category];
   const cleanTitle = capitalizeWords(query);
   const [primaryEdition, secondaryEdition] = CAMPAIGN_EDITIONS[campaign];
-
-  const firstBrand = brands[0];
-  const secondBrand = brands[1];
 
   const basePrice = 129 + ((query.length * 17) % 320);
   const secondPrice = basePrice + 55;
 
-  const firstRank = modelId === AI_MODELS.CHATGPT ? 2 : 1;
-  const secondRank =
-    modelId === AI_MODELS.CHATGPT ? 1 : modelId === AI_MODELS.CLAUDE ? 3 : 2;
-
+  const [firstRank, secondRank] = RANK_BY_MODEL[modelId];
   const hasStalePrice = modelId !== AI_MODELS.CLAUDE;
   const citedSecondPrice = hasStalePrice ? secondPrice + 40 : secondPrice;
   const [primarySources, secondarySources] = SOURCES_BY_MODEL[modelId];
@@ -93,7 +115,7 @@ export function buildDynamicMockCitations(
   return [
     {
       id: `${modelId}-1`,
-      sku: `${firstBrand.slice(0, 3).toUpperCase()}-${100 + query.length}`,
+      sku: buildSku(firstBrand, 100 + query.length),
       name: `${firstBrand} ${cleanTitle} — ${primaryEdition}`,
       brand: firstBrand,
       realPrice: basePrice,
@@ -105,7 +127,7 @@ export function buildDynamicMockCitations(
     },
     {
       id: `${modelId}-2`,
-      sku: `${secondBrand.slice(0, 3).toUpperCase()}-${200 + query.length}`,
+      sku: buildSku(secondBrand, 200 + query.length),
       name: `${secondBrand} ${cleanTitle} (${secondaryEdition})`,
       brand: secondBrand,
       realPrice: secondPrice,

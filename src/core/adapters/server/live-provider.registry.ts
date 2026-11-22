@@ -4,13 +4,32 @@ import {
   AI_MODELS,
   AIModelId,
 } from "@/core/constants/lookup.constants";
+import { LiveProviderUnavailableError } from "@/core/domain/lookup.errors";
 import { ProductCitation } from "@/core/domain/lookup.types";
 
-type RawCitation = Omit<ProductCitation, "id" | "modelId">;
+export type RawCitation = Omit<ProductCitation, "id" | "modelId">;
 
 export interface LiveProviderHandler {
   fetchCitations(query: string, apiKey: string): Promise<RawCitation[]>;
 }
+
+const LIVE_TIMEOUT_MS = 8_000;
+
+
+const GEMINI_BASE = "https://generativelanguage.googleapis.com";
+const GEMINI_ENDPOINT = `${GEMINI_BASE}/v1beta/models/gemini-flash-lite-latest:generateContent`;
+
+const OPENAI_BASE = "https://api.openai.com";
+const OPENAI_ENDPOINT = `${OPENAI_BASE}/v1/chat/completions`;
+
+const ANTHROPIC_BASE = "https://api.anthropic.com";
+const ANTHROPIC_ENDPOINT = `${ANTHROPIC_BASE}/v1/messages`;
+
+const PROVIDER_ENDPOINTS = {
+  GEMINI: GEMINI_ENDPOINT,
+  OPENAI: OPENAI_ENDPOINT,
+  ANTHROPIC: ANTHROPIC_ENDPOINT,
+} as const;
 
 export function resolveProviderApiKey(modelId: AIModelId): string | undefined {
   const envKeyName = AI_ENV_KEYS[modelId];
@@ -23,13 +42,31 @@ function buildShoppingAuditPrompt(modelName: string, query: string): string {
 Return ONLY a valid JSON array of 2 objects with keys: sku, name, brand, realPrice (number), citedPrice (number, optionally +$35 stale), rank (1-3), sentiment ("positive" | "neutral"), sources (2 domains).`;
 }
 
-const GEMINI_HOST = "https://generativelanguage.googleapis.com";
-const GEMINI_PATH = "/v1beta/models/gemini-flash-lite-latest:generateContent";
-const LIVE_TIMEOUT_MS = 8000;
+function parseCitationsPayload(
+  rawText: string | undefined,
+  providerLabel: string
+): RawCitation[] {
+  if (!rawText) {
+    throw new LiveProviderUnavailableError(providerLabel);
+  }
+
+  const cleaned = rawText
+    .replace(/^```json\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  const parsed: unknown = JSON.parse(cleaned);
+  if (!Array.isArray(parsed)) {
+    throw new LiveProviderUnavailableError(providerLabel);
+  }
+
+  return parsed as RawCitation[];
+}
 
 const GEMINI_LIVE_HANDLER: LiveProviderHandler = {
   async fetchCitations(query, apiKey) {
-    const res = await fetch(`${GEMINI_HOST}${GEMINI_PATH}`, {
+    const label = AI_MODEL_LABELS[AI_MODELS.GEMINI];
+    const res = await fetch(PROVIDER_ENDPOINTS.GEMINI, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,7 +74,7 @@ const GEMINI_LIVE_HANDLER: LiveProviderHandler = {
       },
       body: JSON.stringify({
         contents: [
-          { parts: [{ text: buildShoppingAuditPrompt(AI_MODEL_LABELS.gemini, query) }] },
+          { parts: [{ text: buildShoppingAuditPrompt(label, query) }] },
         ],
         generationConfig: { responseMimeType: "application/json" },
       }),
@@ -45,23 +82,21 @@ const GEMINI_LIVE_HANDLER: LiveProviderHandler = {
     });
 
     if (!res.ok) {
-      const detail = await res.text();
-      console.error("[Gemini Error]:", res.status, detail);
-      throw new Error(`Gemini HTTP ${res.status}`);
+      throw new LiveProviderUnavailableError(label);
     }
 
     const data = await res.json();
-    const text: string | undefined = data.candidates?.at(0)?.content?.parts?.at(0)?.text;
-    if (!text) throw new Error("Empty response from Gemini");
+    const text: string | undefined =
+      data.candidates?.at(0)?.content?.parts?.at(0)?.text;
 
-    const cleaned = text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
-    return JSON.parse(cleaned);
+    return parseCitationsPayload(text, label);
   },
 };
 
 const OPENAI_LIVE_HANDLER: LiveProviderHandler = {
   async fetchCitations(query, apiKey) {
-    const res = await fetch("https://openai.com", {
+    const label = AI_MODEL_LABELS[AI_MODELS.CHATGPT];
+    const res = await fetch(PROVIDER_ENDPOINTS.OPENAI, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,21 +105,27 @@ const OPENAI_LIVE_HANDLER: LiveProviderHandler = {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "user", content: buildShoppingAuditPrompt(AI_MODEL_LABELS.chatgpt, query) },
+          { role: "user", content: buildShoppingAuditPrompt(label, query) },
         ],
       }),
+      signal: AbortSignal.timeout(LIVE_TIMEOUT_MS),
     });
 
-    if (!res.ok) throw new Error("OpenAI API request failed");
+    if (!res.ok) {
+      throw new LiveProviderUnavailableError(label);
+    }
+
     const data = await res.json();
-    const text = data.choices?.at(0)?.message?.content;
-    return JSON.parse(text);
+    const text: string | undefined = data.choices?.at(0)?.message?.content;
+
+    return parseCitationsPayload(text, label);
   },
 };
 
 const CLAUDE_LIVE_HANDLER: LiveProviderHandler = {
   async fetchCitations(query, apiKey) {
-    const res = await fetch("https://anthropic.com", {
+    const label = AI_MODEL_LABELS[AI_MODELS.CLAUDE];
+    const res = await fetch(PROVIDER_ENDPOINTS.ANTHROPIC, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -95,15 +136,20 @@ const CLAUDE_LIVE_HANDLER: LiveProviderHandler = {
         model: "claude-3-5-haiku-latest",
         max_tokens: 600,
         messages: [
-          { role: "user", content: buildShoppingAuditPrompt(AI_MODEL_LABELS.claude, query) },
+          { role: "user", content: buildShoppingAuditPrompt(label, query) },
         ],
       }),
+      signal: AbortSignal.timeout(LIVE_TIMEOUT_MS),
     });
 
-    if (!res.ok) throw new Error("Anthropic API request failed");
+    if (!res.ok) {
+      throw new LiveProviderUnavailableError(label);
+    }
+
     const data = await res.json();
-    const text = data.content?.at(0)?.text;
-    return JSON.parse(text);
+    const text: string | undefined = data.content?.at(0)?.text;
+
+    return parseCitationsPayload(text, label);
   },
 };
 

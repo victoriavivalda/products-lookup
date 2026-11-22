@@ -3,7 +3,6 @@
   [data-campaign="black-friday"] {
     --surface-canvas: var(--bf-light-canvas);
     --surface-subtle: var(--bf-light-subtle);
-    --text-primary: var(--bf-light-text);
     --accent-primary: var(--bf-light-accent);
     --radius-card: var(--bf-radius);
   }
@@ -13,7 +12,6 @@
     [data-campaign="black-friday"] {
       --surface-canvas: var(--bf-dark-canvas);
       --surface-subtle: var(--bf-dark-subtle);
-      --text-primary: var(--bf-dark-text);
       --accent-primary: var(--bf-dark-accent);
     }
   }

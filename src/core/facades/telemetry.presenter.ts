@@ -1,3 +1,4 @@
+import { AIModelId } from "@/core/constants/lookup.constants";
 import { AIProviderResponse } from "@/core/domain/lookup.types";
 import {
   buildVisibilitySeries,
@@ -5,50 +6,58 @@ import {
 } from "@/features/lookup/components/visibility-matrix/visibility-matrix.utils";
 
 export interface EngineTelemetryMetric {
-  modelId: string;
-  modelName: string;
-  latencyMs: number;
-  latencyBarPercent: number;
-  priceAccuracyPercent: number;
-  isFullyVerified: boolean;
+  readonly modelId: AIModelId;
+  readonly modelName: string;
+  readonly latencyMs: number;
+  readonly latencyBarPercent: number;
+  readonly priceAccuracyPercent: number;
+  readonly isFullyVerified: boolean;
 }
 
 export interface AuditTelemetryViewModel {
-  engineMetrics: EngineTelemetryMetric[];
-  visibilitySeries: ProductSeries[];
-  totalEngines: number;
+  readonly engineMetrics: readonly EngineTelemetryMetric[];
+  readonly visibilitySeries: readonly ProductSeries[];
+  readonly totalEngines: number;
+}
+
+const MIN_LATENCY_BAR_PERCENT = 12;
+
+function calculatePriceAccuracy(engine: AIProviderResponse): number {
+  const totalItems = engine.citations.length;
+  if (totalItems === 0) return 100;
+
+  const verifiedItems = engine.citations.filter(
+    (citation) => citation.citedPrice === citation.realPrice
+  ).length;
+
+  return Math.round((verifiedItems / totalItems) * 100);
+}
+
+function toEngineMetric(
+  engine: AIProviderResponse,
+  maxLatency: number
+): EngineTelemetryMetric {
+  const priceAccuracyPercent = calculatePriceAccuracy(engine);
+  const rawBarPercent = Math.round((engine.latencyMs / maxLatency) * 100);
+
+  return {
+    modelId: engine.modelId,
+    modelName: engine.modelName,
+    latencyMs: engine.latencyMs,
+    latencyBarPercent: Math.max(MIN_LATENCY_BAR_PERCENT, rawBarPercent),
+    priceAccuracyPercent,
+    isFullyVerified: priceAccuracyPercent === 100,
+  };
 }
 
 export function buildAuditTelemetryViewModel(
-  responses: AIProviderResponse[]
+  responses: readonly AIProviderResponse[]
 ): AuditTelemetryViewModel {
   const maxLatency = Math.max(...responses.map((r) => r.latencyMs), 1);
 
-  const engineMetrics: EngineTelemetryMetric[] = responses.map((engine) => {
-    const totalItems = engine.citations.length;
-    const verifiedItems = engine.citations.filter(
-      (c) => c.citedPrice === c.realPrice
-    ).length;
-
-    const priceAccuracyPercent =
-      totalItems > 0 ? Math.round((verifiedItems / totalItems) * 100) : 100;
-
-    return {
-      modelId: engine.modelId,
-      modelName: engine.modelName,
-      latencyMs: engine.latencyMs,
-      latencyBarPercent: Math.max(
-        12,
-        Math.round((engine.latencyMs / maxLatency) * 100)
-      ),
-      priceAccuracyPercent,
-      isFullyVerified: priceAccuracyPercent === 100,
-    };
-  });
-
   return {
-    engineMetrics,
-    visibilitySeries: buildVisibilitySeries(responses),
+    engineMetrics: responses.map((engine) => toEngineMetric(engine, maxLatency)),
+    visibilitySeries: buildVisibilitySeries([...responses]),
     totalEngines: responses.length,
   };
 }

@@ -18,12 +18,33 @@ import { EmptyLookupState } from "@/features/lookup/components/EmptyLookupState"
 import { EngineTelemetryChart } from "@/features/lookup/components/EngineTelemetryChart";
 import { VisibilityMatrixChart } from "@/features/lookup/components/visibility-matrix/VisibilityMatrixChart";
 
+interface SearchQueryState {
+  draft: string;
+  submitted: string;
+}
+
+function LookupHeroHeader() {
+  return (
+    <header className="mb-8 max-w-2xl space-y-2.5">
+      <h1 className="text-(length:--fluid-h1) font-semibold leading-[1.15] tracking-tight">
+        Inspect product visibility and price accuracy across AI engines
+      </h1>
+      <p className="text-sm text-(--text-muted)">
+        Real-time citation telemetry, stale pricing detection, and automated
+        executive reporting.
+      </p>
+    </header>
+  );
+}
+
 export default function ProductsLookupPage() {
   const [scenario, setScenario] = useState<SimulationScenario>(
     SIMULATION_SCENARIOS.NORMAL
   );
-  const [draftQuery, setDraftQuery] = useState<string>("");
-  const [submittedQuery, setSubmittedQuery] = useState<string>("");
+  const [query, setQuery] = useState<SearchQueryState>({
+    draft: "",
+    submitted: "",
+  });
 
   const { campaign, setCampaign, label } = useCampaignTheme(
     CAMPAIGN_THEMES.BLACK_FRIDAY
@@ -35,13 +56,12 @@ export default function ProductsLookupPage() {
     totalEngines,
     conclusion,
     hasActiveQuery,
-  } = useMultiEngineLookup(submittedQuery, campaign, scenario);
+  } = useMultiEngineLookup(query.submitted, campaign, scenario);
 
   const activePresets = CAMPAIGN_PRESET_PROMPTS[campaign];
 
   const handleSelectPreset = (preset: string) => {
-    setDraftQuery(preset);
-    setSubmittedQuery(preset);
+    setQuery({ draft: preset, submitted: preset });
   };
 
   return (
@@ -59,24 +79,15 @@ export default function ProductsLookupPage() {
             : "Ready for product search."}
         </p>
 
-        <header className="mb-8 max-w-2xl space-y-2.5">
-          <h1
-            className="font-semibold leading-[1.15] tracking-[-0.025em]"
-            style={{ fontSize: "var(--fluid-h1)" }}
-          >
-            Inspect product visibility and price accuracy across AI engines
-          </h1>
-          <p className="text-sm text-[var(--text-muted)]">
-            Real-time citation telemetry, stale pricing detection, and automated
-            executive reporting.
-          </p>
-        </header>
+        <LookupHeroHeader />
 
         <SearchCommandBar
-          value={draftQuery}
+          value={query.draft}
           presets={activePresets}
-          onChange={setDraftQuery}
-          onSubmit={setSubmittedQuery}
+          onChange={(draft) => setQuery((prev) => ({ ...prev, draft }))}
+          onSubmit={(submitted) =>
+            setQuery((prev) => ({ ...prev, submitted }))
+          }
         />
 
         <div className="flex-1">

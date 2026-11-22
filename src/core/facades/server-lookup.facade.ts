@@ -11,7 +11,10 @@ import {
   LiveProviderUnavailableError,
   MissingProviderKeyError,
 } from "@/core/domain/lookup.errors";
-import { AIProviderResponse, ProductCitation } from "@/core/domain/lookup.types";
+import {
+  AIProviderResponse,
+  ProductCitation,
+} from "@/core/domain/lookup.types";
 import {
   LIVE_PROVIDER_REGISTRY,
   resolveProviderApiKey,
@@ -24,7 +27,21 @@ const SIMULATED_LATENCY_MS: Record<AIModelId, number> = {
   [AI_MODELS.CLAUDE]: 1380,
 };
 
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+function buildTimedResponse(
+  modelId: AIModelId,
+  startTime: number,
+  citations: ProductCitation[]
+): AIProviderResponse {
+  return {
+    modelId,
+    modelName: AI_MODEL_LABELS[modelId],
+    latencyMs: Math.round(performance.now() - startTime),
+    citations,
+  };
+}
 
 async function executeLiveLookup(
   modelId: AIModelId,
@@ -56,7 +73,6 @@ export async function performServerLookup(
   forceMode?: ExecutionForceMode,
   campaign?: CampaignTheme
 ): Promise<AIProviderResponse> {
-  const modelName = AI_MODEL_LABELS[modelId];
   const apiKey = resolveProviderApiKey(modelId);
   const isStrictLive = forceMode === EXECUTION_FORCE_MODES.LIVE;
   const isForcedMock = forceMode === EXECUTION_FORCE_MODES.MOCK;
@@ -70,24 +86,16 @@ export async function performServerLookup(
   if (!isForcedMock && apiKey) {
     try {
       const citations = await executeLiveLookup(modelId, query, apiKey);
-      return {
-        modelId,
-        modelName,
-        latencyMs: Math.round(performance.now() - startTime),
-        citations,
-      };
-    } catch {
+      return buildTimedResponse(modelId, startTime, citations);
+    } catch (error) {
       if (isStrictLive) {
-        throw new LiveProviderUnavailableError(modelName);
+        throw new LiveProviderUnavailableError(AI_MODEL_LABELS[modelId], {
+          cause: error,
+        });
       }
     }
   }
 
-  const citations = await executeMockLookup(modelId, query, campaign);
-  return {
-    modelId,
-    modelName,
-    latencyMs: Math.round(performance.now() - startTime),
-    citations,
-  };
+  const mockCitations = await executeMockLookup(modelId, query, campaign);
+  return buildTimedResponse(modelId, startTime, mockCitations);
 }

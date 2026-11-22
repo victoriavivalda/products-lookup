@@ -1,11 +1,14 @@
-@layer base, components, utilities;
-
 @import "tailwindcss";
 @import "../styles/1-repository.css";
 @import "../styles/themes/theme-black-friday.css";
 @import "../styles/themes/theme-christmas.css";
 @import "../styles/themes/theme-july4.css";
 @import "../styles/2-facade.css";
+
+@theme inline {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+}
 
 @layer base {
   body {

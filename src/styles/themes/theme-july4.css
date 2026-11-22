@@ -2,7 +2,6 @@
   [data-campaign="july4"] {
     --surface-canvas: var(--july4-light-canvas);
     --surface-subtle: var(--july4-light-subtle);
-    --text-primary: var(--july4-light-text);
     --accent-primary: var(--july4-light-accent);
     --radius-card: var(--july4-radius);
   }
@@ -11,7 +10,6 @@
     [data-campaign="july4"] {
       --surface-canvas: var(--july4-dark-canvas);
       --surface-subtle: var(--july4-dark-subtle);
-      --text-primary: var(--july4-dark-text);
       --accent-primary: var(--july4-dark-accent);
     }
   }
