@@ -1,15 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Search } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 
 interface SearchCommandBarProps {
-  query: string;
-  presets: string[];
-  onQueryChange: (value: string) => void;
+  value: string;
+  presets: readonly string[];
+  onChange: (value: string) => void;
+  onSubmit: (query: string) => void;
 }
 
-export function SearchCommandBar({ query, presets, onQueryChange }: SearchCommandBarProps) {
+export function SearchCommandBar({
+  value,
+  presets,
+  onChange,
+  onSubmit,
+}: SearchCommandBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -23,36 +29,74 @@ export function SearchCommandBar({ query, presets, onQueryChange }: SearchComman
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = value.trim();
+    if (trimmed) onSubmit(trimmed);
+  };
+
   return (
-    <div className="mb-10 space-y-4">
-      <div className="pl-card flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-3">
-          <Search className="h-4 w-4 text-[var(--text-muted)]" />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Enter consumer shopping prompt..."
-            className="w-full bg-transparent text-sm outline-none"
-          />
-        </div>
-        <kbd className="hidden rounded border border-[var(--border-hairline)] px-2 py-0.5 font-mono text-[11px] text-[var(--text-muted)] sm:inline-block">
+    <section className="mb-8 space-y-3">
+      <form
+        onSubmit={handleFormSubmit}
+        className="pl-card flex items-center gap-3 p-2 pl-4 focus-within:border-[var(--accent-primary)]"
+      >
+        <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Enter a product query or shopping prompt (e.g., best espresso machine under $500)..."
+          className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]"
+        />
+
+        {value && (
+          <button
+            type="button"
+            onClick={() => {
+              onChange("");
+              onSubmit("");
+            }}
+            aria-label="Clear query"
+            className="rounded-md p-1.5 text-[var(--text-muted)] transition hover:text-[var(--text-primary)]"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+
+        <kbd className="hidden rounded border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--text-muted)] sm:inline-block">
           ⌘K
         </kbd>
-      </div>
+
+        <button
+          type="submit"
+          disabled={!value.trim()}
+          className="pl-accent-pill inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3.5 py-2 font-mono text-xs font-medium transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <span>Inspect</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
+      </form>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-xs text-[var(--text-muted)]">Quick prompts:</span>
+        <span className="font-mono text-[11px] text-[var(--text-muted)]">
+          Quick prompts:
+        </span>
         {presets.map((preset) => (
           <button
             key={preset}
-            onClick={() => onQueryChange(preset)}
-            className="rounded-md border border-[var(--border-hairline)] px-2.5 py-1 font-mono text-xs text-[var(--text-muted)] transition hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]"
+            type="button"
+            onClick={() => {
+              onChange(preset);
+              onSubmit(preset);
+            }}
+            className="rounded-full border border-[var(--border-hairline)] bg-[var(--surface-subtle)] px-3 py-1 font-mono text-[11px] text-[var(--text-primary)] transition hover:border-[var(--accent-primary)]"
           >
             {preset}
           </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

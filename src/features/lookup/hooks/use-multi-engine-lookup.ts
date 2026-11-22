@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { lookupFacade } from "@/core/facades/lookup.facade";
 import { SimulationDecoratorStrategy } from "@/core/adapters/simulation-decorator.strategy";
@@ -12,19 +12,12 @@ import {
 } from "@/core/constants/lookup.constants";
 
 export function useMultiEngineLookup(
-  rawQuery: string,
+  committedQuery: string,
   campaign: CampaignTheme,
   scenario: SimulationScenario = SIMULATION_SCENARIOS.NORMAL
 ) {
-  const [debouncedQuery, setDebouncedQuery] = useState(() => rawQuery.trim());
-
-  useEffect(() => {
-    const timer = setTimeout(
-      () => setDebouncedQuery(rawQuery.trim()),
-      UI_CONFIG.SEARCH_DEBOUNCE_MS
-    );
-    return () => clearTimeout(timer);
-  }, [rawQuery]);
+  const normalizedQuery = committedQuery.trim();
+  const hasActiveQuery = normalizedQuery.length > 0;
 
   const adapters = useMemo(
     () =>
@@ -34,18 +27,16 @@ export function useMultiEngineLookup(
     [scenario]
   );
 
-  const hasActiveQuery = debouncedQuery.length > 0;
-
   const queries = useQueries({
     queries: adapters.map((adapter) => ({
       queryKey: [
         QUERY_KEYS.PRODUCTS_LOOKUP,
         adapter.modelId,
-        debouncedQuery,
+        normalizedQuery,
         campaign,
         scenario,
       ],
-      queryFn: () => adapter.execute(debouncedQuery, campaign),
+      queryFn: () => adapter.execute(normalizedQuery, campaign),
       enabled: hasActiveQuery,
       staleTime: UI_CONFIG.CACHE_STALE_TIME_MS,
       retry: false,
@@ -63,7 +54,7 @@ export function useMultiEngineLookup(
 
   const conclusion =
     hasActiveQuery && completedResponses.length > 0
-      ? lookupFacade.synthesizeConclusions(debouncedQuery, completedResponses)
+      ? lookupFacade.synthesizeConclusions(normalizedQuery, completedResponses)
       : null;
 
   return {

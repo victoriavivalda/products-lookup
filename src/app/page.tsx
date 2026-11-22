@@ -21,7 +21,9 @@ export default function ProductsLookupPage() {
   const [scenario, setScenario] = useState<SimulationScenario>(
     SIMULATION_SCENARIOS.NORMAL
   );
-  const [query, setQuery] = useState<string>("");
+  const [draftQuery, setDraftQuery] = useState<string>("");
+  const [submittedQuery, setSubmittedQuery] = useState<string>("");
+
   const { campaign, setCampaign, label } = useCampaignTheme(
     CAMPAIGN_THEMES.BLACK_FRIDAY
   );
@@ -32,9 +34,14 @@ export default function ProductsLookupPage() {
     totalEngines,
     conclusion,
     hasActiveQuery,
-  } = useMultiEngineLookup(query, campaign, scenario);
+  } = useMultiEngineLookup(submittedQuery, campaign, scenario);
 
   const activePresets = CAMPAIGN_PRESET_PROMPTS[campaign];
+
+  const handleSelectPreset = (preset: string) => {
+    setDraftQuery(preset);
+    setSubmittedQuery(preset);
+  };
 
   return (
     <div className="min-h-screen transition-colors duration-200">
@@ -61,15 +68,16 @@ export default function ProductsLookupPage() {
         </header>
 
         <SearchCommandBar
-          query={query}
+          value={draftQuery}
           presets={activePresets}
-          onQueryChange={setQuery}
+          onChange={setDraftQuery}
+          onSubmit={setSubmittedQuery}
         />
 
         {!hasActiveQuery ? (
           <EmptyLookupState
             presets={activePresets}
-            onSelectPreset={setQuery}
+            onSelectPreset={handleSelectPreset}
           />
         ) : (
           <>
