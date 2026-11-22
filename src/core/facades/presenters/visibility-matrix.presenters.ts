@@ -56,7 +56,10 @@ function extractBaseProductName(name: string): string {
 }
 
 function getNormalizedProductKey(brand: string, name: string): string {
-  return `${brand.toLowerCase().trim()}::${extractBaseProductName(name).toLowerCase()}`;
+  const normalizedBrand = brand.toLowerCase().trim();
+  return normalizedBrand.length > 0
+    ? normalizedBrand
+    : extractBaseProductName(name).toLowerCase();
 }
 
 export function buildVisibilitySeries(
