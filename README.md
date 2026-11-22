@@ -13,7 +13,7 @@ Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS v4**, **TanS
 - **Hybrid Execution Engine (`mock` / `auto` / `live`):** Powered by **Strategy, Factory, and Resilient Proxy** patterns—supports real LLM APIs with automatic fallback to a dynamic contextual catalog generator.
 - **Data-Driven Motion & Vector Visualizations:**
   - **Engine Latency & Accuracy Benchmark:** Framer Motion horizontal progress bars with `tabular-nums` alignment, WAI-ARIA `progressbar` semantics, and `useReducedMotion()` accessibility support.
-  - **Cross-Engine Ranking Bump Chart:** Modular SVG trajectory chart (`pathLength` Bezier curves) with keyboard focus navigation tracking product ranks (`#1`–`#3`), cross-engine presence, and verified vs. drifted pricing.
+  - **Cross-Engine Ranking Bump Chart:** Modular SVG trajectory chart (`pathLength` Bezier curves) with keyboard focus navigation tracking product ranks (`#1`–`#3`), normalized cross-engine brand presence, and verified vs. drifted pricing.
 - **Telemetry Edge-Case Simulator (Decorator Pattern):** Non-invasive `SimulationDecoratorStrategy` accessible from the footer (**API Conditions**: `Normal`, `Slow Network`, `Partial Outage`, `Price Drift`) to verify isolated error recovery, asymmetric latency loading, and drift alerts without mutating core adapters.
 - **Isomorphic Vector PDF & Email Dispatch:** Shares a single `AuditTelemetryViewModel` presenter and modular `<ExecutiveReportPDF />` template (`@react-pdf/renderer`) for both client-side PDF downloads and server-side [Resend](https://resend.com) email attachments with HTML sanitization.
 - **Campaign-Driven Seasonal Theming:** Switch between *Black Friday*, *Christmas*, and *4th of July*—dynamically updating OKLCH color palettes, card radii, suggested prompts, and catalog editions while preserving per-campaign query cache.
@@ -26,36 +26,41 @@ Built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS v4**, **TanS
 This project mirrors a **Repository → Facade → Controller** pattern across both the TypeScript domain layer and the CSS cascade:
 
 ```text
-src/
-├── app/
-│   ├── api/
-│   │   ├── lookup/route.ts                # Thin REST controller for multi-engine queries
-│   │   ├── stream-brief/route.ts          # Native ReadableStream endpoint for AI synthesis
-│   │   └── report/send/route.ts           # Thin REST controller for email + PDF dispatch
-│   ├── globals.css                        # Tailwind v4 & layered CSS entrypoint
-│   ├── layout.tsx                         # Font variables (Inter, JetBrains Mono) & QueryProvider
-│   └── page.tsx                           # Main lookup controller view
+├── e2e/                                   # END-TO-END TESTS (PLAYWRIGHT)
+│   └── lookup/
+│       ├── search-and-report.spec.ts      # Search execution, theme switching & PDF download
+│       └── resilience-simulation.spec.ts  # Partial outage isolation & price drift alerts
 │
-├── styles/                                # LAYERED CSS DESIGN SYSTEM
-│   ├── 1-repository.css                   # Raw OKLCH primitives, campaign palettes & fluid scales
-│   ├── themes/                            # Swappable campaign theme contracts
-│   │   ├── theme-black-friday.css
-│   │   ├── theme-christmas.css
-│   │   └── theme-july4.css
-│   └── 2-facade.css                       # Semantic tokens, OS media queries & UI primitives
-│
-├── core/                                  # DOMAIN & PROVIDER LAYER (SOLID)
-│   ├── constants/                         # Typed domain constants, simulation modes & env key maps
-│   ├── domain/                            # Immutable TypeScript entities & semantic domain errors
-│   ├── repositories/                      # Dynamic seasonal catalog generator (fallback data)
-│   ├── adapters/                          # Strategy, Resilient Proxy, Simulation Decorator, Factory & tests
-│   └── facades/                           # Lookup, StreamBrief, ReportDispatch, TelemetryPresenter & tests
-│
-├── features/lookup/                       # CONTROLLER & PRESENTATION LAYER
-│   ├── hooks/                             # Custom hooks (useMultiEngineLookup, useExecutiveStream, useCampaignTheme, useReportExport)
-│   └── components/                        # Modular UI components & visibility-matrix SVG subcomponents
-│
-└── components/report/                     # Modular vector PDF template (executive-report/) & export actions
+└── src/
+    ├── app/
+    │   ├── api/
+    │   │   ├── lookup/route.ts            # Thin REST controller for multi-engine queries
+    │   │   ├── stream-brief/route.ts      # Native ReadableStream endpoint for AI synthesis
+    │   │   └── report/send/route.ts       # Thin REST controller for email + PDF dispatch
+    │   ├── globals.css                    # Tailwind v4 & layered CSS entrypoint
+    │   ├── layout.tsx                     # Font variables (Inter, JetBrains Mono) & QueryProvider
+    │   └── page.tsx                       # Main lookup controller view
+    │
+    ├── styles/                            # LAYERED CSS DESIGN SYSTEM
+    │   ├── 1-repository.css               # Raw OKLCH primitives, campaign palettes & fluid scales
+    │   ├── themes/                        # Swappable campaign theme contracts
+    │   │   ├── theme-black-friday.css
+    │   │   ├── theme-christmas.css
+    │   │   └── theme-july4.css
+    │   └── 2-facade.css                   # Semantic tokens, OS media queries & UI primitives
+    │
+    ├── core/                              # DOMAIN & PROVIDER LAYER (SOLID)
+    │   ├── constants/                     # Typed domain constants, simulation modes & env key maps
+    │   ├── domain/                        # Immutable TypeScript entities & semantic domain errors
+    │   ├── repositories/                  # Dynamic seasonal catalog generator (fallback data)
+    │   ├── adapters/                      # Strategy, Resilient Proxy, Simulation Decorator, Factory & server registry
+    │   └── facades/                       # Use-case facades & pure ViewModel presenters (presenters/)
+    │
+    ├── features/lookup/                   # CONTROLLER & PRESENTATION LAYER
+    │   ├── hooks/                         # Custom hooks (useMultiEngineLookup, useExecutiveStream, useCampaignTheme, useReportExport)
+    │   └── components/                    # Colocated UI components, ReportActions & visibility-matrix SVG subcomponents
+    │
+    └── components/report/                 # Isomorphic vector PDF template (executive-report/)
 ```
 
 ### Design Engineering Decisions
@@ -90,7 +95,7 @@ cp .env.example .env.local
 ```
 
 ```env
-# Execution mode: "mock" (default) | "auto" (live with fallback) | "live" (strict)
+# Execution mode: "mock" (default if omitted) | "auto" (live with mock fallback) | "live" (strict)
 NEXT_PUBLIC_PROVIDER_MODE=auto
 
 # Optional AI Provider API Keys (used when mode is "auto" or "live")
@@ -98,9 +103,10 @@ GEMINI_API_KEY=
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
 
-# Optional Email Delivery Key (Resend)
+# Optional Email Delivery Key (Resend) — if omitted, email dispatch runs in simulated mode
 RESEND_API_KEY=
-# Optional: Set only if you have a verified custom domain in Resend
+
+# Optional: Only uncomment if you own a verified domain in Resend (defaults to onboarding@resend.dev)
 # RESEND_FROM_EMAIL="Products Lookup <audit@yourdomain.com>"
 ```
 
@@ -112,12 +118,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. Press **`⌘K`** (or **`Ctrl+K`**) at any time to focus the search command bar, and use the **API Conditions** controls in the footer to simulate network latency, partial outages, and price drift.
 
-### 4. Run Unit Tests & Quality Checks
+### 4. Run Tests & Quality Checks
 
 ```bash
-npm test          # Run Vitest unit tests (Adapters, Facades, Presenters, Stream & Dispatch)
-npm run lint      # Run ESLint checks
-npm run build     # Verify production build
+npm test               # Run Vitest unit & integration test suites (21 suites / 62 tests)
+npm run test:coverage  # Generate V8 test coverage report (~88% lines, >94% core domain)
+npm run test:e2e       # Run Playwright End-to-End browser tests
+npm run lint           # Run ESLint checks
+npm run typecheck      # Run TypeScript compiler checks
+npm run build          # Verify production build
+npm run check          # Run full CI verification (lint + typecheck + test + build)
 ```
 
 ---
@@ -126,4 +136,4 @@ npm run build     # Verify production build
 
 - **Client-Side Session Caching vs. Distributed Cache:** Query results are cached per `(modelId, query, campaign, scenario)` in TanStack Query (`30m` stale time) for instant cross-campaign comparison without redundant LLM token spend. In a multi-tenant production environment, this would be backed by Redis/KV edge caching with rate limiting per IP/API key.
 - **Zero-Dependency Runtime Type Guards:** API routes use lightweight TypeScript type guards to avoid bundle overhead; if payload schemas grow, migrating to `zod` would centralize validation and OpenAPI generation.
-- **Test Coverage Focus:** Unit tests prioritize the `core/` domain, resilience proxies, SSE stream fallback chains, and presenters where algorithmic risk is highest. Adding Playwright E2E flows would be the next step for full UI regression coverage.
+- **Pyramid Testing Strategy:** Unit and integration tests cover `core/`, API Route Handlers, hooks, and interactive components (`jsdom`), complemented by Playwright E2E tests for browser-native capabilities such as physical PDF downloads and live campaign switching.
