@@ -4,11 +4,12 @@ import { useEffect, useEffectEvent, useState } from "react";
 import { AIProviderResponse, ExecutiveConclusion } from "@/core/domain/lookup.types";
 
 interface StreamState {
+  key: string;
   text: string;
   isStreaming: boolean;
 }
 
-const INITIAL_STATE: StreamState = { text: "", isStreaming: false };
+const INITIAL_STATE: StreamState = { key: "", text: "", isStreaming: false };
 
 async function fetchExecutiveStream(
   payload: {
@@ -49,44 +50,58 @@ export function useExecutiveStream(
   const queryKey = conclusion?.query ?? "";
   const enginesCount = responses.length;
   const isReady = Boolean(conclusion && enginesCount > 0);
+  const requestKey = isReady ? `${queryKey}:${enginesCount}` : "";
 
-  const startStream = useEffectEvent(async (signal: AbortSignal) => {
-    if (!conclusion) return;
+  const startStream = useEffectEvent(
+    async (key: string, signal: AbortSignal) => {
+      if (!conclusion || signal.aborted) return;
 
-    setState({ text: "", isStreaming: true });
+      setState({ key, text: "", isStreaming: true });
 
-    try {
-      await fetchExecutiveStream(
-        { query: queryKey, conclusion, responses },
-        (chunk) => setState((prev) => ({ ...prev, text: prev.text + chunk })),
-        signal
-      );
-    } catch (error) {
-      const isAbortError = error instanceof Error && error.name === "AbortError";
-      if (!isAbortError) {
-        setState((prev) => ({
-          ...prev,
-          text: conclusion.recommendedAction,
-        }));
-      }
-    } finally {
-      if (!signal.aborted) {
-        setState((prev) => ({ ...prev, isStreaming: false }));
+      try {
+        await fetchExecutiveStream(
+          { query: queryKey, conclusion, responses },
+          (chunk) =>
+            setState((prev) =>
+              prev.key === key ? { ...prev, text: prev.text + chunk } : prev
+            ),
+          signal
+        );
+      } catch (error) {
+        const isAbortError =
+          error instanceof Error && error.name === "AbortError";
+        if (!isAbortError && !signal.aborted) {
+          setState({
+            key,
+            text: conclusion.recommendedAction,
+            isStreaming: false,
+          });
+        }
+      } finally {
+        if (!signal.aborted) {
+          setState((prev) =>
+            prev.key === key ? { ...prev, isStreaming: false } : prev
+          );
+        }
       }
     }
-  });
+  );
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!requestKey) return;
 
     const controller = new AbortController();
-    void startStream(controller.signal);
+    queueMicrotask(() => {
+      void startStream(requestKey, controller.signal);
+    });
 
     return () => controller.abort();
-  }, [isReady, queryKey, enginesCount]);
+  }, [requestKey]);
+
+  const isCurrentKey = isReady && state.key === requestKey;
 
   return {
-    streamedText: isReady ? state.text : "",
-    isStreaming: isReady ? state.isStreaming : false,
+    streamedText: isCurrentKey ? state.text : "",
+    isStreaming: isCurrentKey ? state.isStreaming : false,
   };
 }

@@ -10,7 +10,7 @@ import {
 import { PDF_COLORS, pdfStyles } from "./pdf.styles";
 
 interface TrajectorySvgSectionProps {
-  visibilitySeries: ProductSeries[];
+  visibilitySeries: readonly ProductSeries[];
   totalEngines: number;
 }
 

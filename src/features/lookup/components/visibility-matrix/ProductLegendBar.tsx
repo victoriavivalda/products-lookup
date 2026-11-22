@@ -1,4 +1,4 @@
-import { ProductSeries } from "./visibility-matrix.utils";
+import { ProductSeries } from "@/core/facades/presenters/visibility-matrix.presenters";
 
 interface ProductLegendBarProps {
   seriesList: ProductSeries[];
