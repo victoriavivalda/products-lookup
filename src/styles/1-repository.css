@@ -1,46 +1,45 @@
 @layer base {
   :root {
-    /* Superficies y tintas base */
-    --raw-white: oklch(1 0 0);
-    --raw-snow: oklch(0.985 0.002 260);
-    --raw-obsidian: oklch(0.13 0.005 285);
-    --raw-charcoal: oklch(0.17 0.006 285);
+    --raw-white: oklch(1 0 0);                 
+    --raw-snow: oklch(0.98 0.002 250);         
+    --raw-ink: oklch(0.24 0.006 260);          
+    --raw-ink-muted: oklch(0.47 0.01 260);     
 
-    /* Escala tipográfica fluida (responde al zoom del navegador y al viewport) */
+    --raw-obsidian: oklch(0.18 0.005 260);     
+    --raw-charcoal: oklch(0.23 0.006 260);     
+    --raw-cloud: oklch(0.93 0.004 260);        
+    --raw-cloud-muted: oklch(0.70 0.008 260);  
+
+    --shadow-card: 0 1px 2px 0 oklch(0.24 0.006 260 / 0.06),
+                   0 1px 3px 1px oklch(0.24 0.006 260 / 0.04);
+    --shadow-card-hover: 0 1px 3px 0 oklch(0.24 0.006 260 / 0.10),
+                         0 4px 8px 3px oklch(0.24 0.006 260 / 0.06);
+
     --fluid-h1: clamp(1.5rem, 2.2vw + 1rem, 2.35rem);
     --fluid-body: clamp(0.875rem, 0.2vw + 0.82rem, 1rem);
 
-    /* Paleta Primitiva: Black Friday (High-Energy Retail) */
-    --bf-light-canvas: oklch(0.985 0.005 75);
-    --bf-light-subtle: oklch(0.955 0.01 75);
-    --bf-light-text: oklch(0.14 0.015 55);
-    --bf-light-accent: oklch(0.60 0.23 38);
-    --bf-dark-canvas: oklch(0.11 0.008 55);
-    --bf-dark-subtle: oklch(0.15 0.012 55);
-    --bf-dark-text: oklch(0.98 0.005 75);
-    --bf-dark-accent: oklch(0.72 0.21 44);
-    --bf-radius: 0.375rem;
+    --bf-light-canvas: var(--raw-snow);
+    --bf-light-subtle: oklch(0.955 0 0);
+    --bf-light-accent: oklch(0.20 0 0);
+    --bf-dark-canvas: oklch(0.14 0 0);
+    --bf-dark-subtle: oklch(0.19 0 0);
+    --bf-dark-accent: oklch(0.95 0 0);
+    --bf-radius: 0.5rem;
 
-    /* Paleta Primitiva: Christmas (Ruby & Pine Editorial) */
-    --xmas-light-canvas: oklch(0.985 0.015 85);
-    --xmas-light-subtle: oklch(0.945 0.024 85);
-    --xmas-light-text: oklch(0.21 0.06 155);
-    --xmas-light-accent: oklch(0.48 0.22 22);
-    --xmas-dark-canvas: oklch(0.14 0.035 155);
-    --xmas-dark-subtle: oklch(0.19 0.04 155);
-    --xmas-dark-text: oklch(0.96 0.018 85);
-    --xmas-dark-accent: oklch(0.76 0.16 78);
-    --xmas-radius: 0.875rem;
+    --xmas-light-canvas: oklch(0.98 0.004 85);
+    --xmas-light-subtle: oklch(0.955 0.008 85);
+    --xmas-light-accent: oklch(0.46 0.18 22);
+    --xmas-dark-canvas: var(--raw-obsidian);
+    --xmas-dark-subtle: var(--raw-charcoal);
+    --xmas-dark-accent: oklch(74.427% 0.091 92.813); 
+    --xmas-radius: 0.5rem;
 
-    /* Paleta Primitiva: 4th of July (Cobalt & Crimson Crisp) */
-    --july4-light-canvas: oklch(0.998 0.002 250);
-    --july4-light-subtle: oklch(0.955 0.018 255);
-    --july4-light-text: oklch(0.22 0.09 262);
-    --july4-light-accent: oklch(0.49 0.23 262);
-    --july4-dark-canvas: oklch(0.14 0.05 262);
-    --july4-dark-subtle: oklch(0.19 0.06 262);
-    --july4-dark-text: oklch(0.98 0.006 250);
-    --july4-dark-accent: oklch(0.68 0.20 260);
-    --july4-radius: 0.25rem;
+    --july4-light-canvas: var(--raw-snow);
+    --july4-light-subtle: oklch(0.955 0.006 255);
+    --july4-light-accent: oklch(0.55 0.20 260); 
+    --july4-dark-canvas: var(--raw-obsidian);
+    --july4-dark-subtle: var(--raw-charcoal);
+    --july4-dark-accent: oklch(0.75 0.14 255);
+    --july4-radius: 0.5rem;
   }
 }

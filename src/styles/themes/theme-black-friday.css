@@ -1,15 +1,16 @@
 @layer base {
-  :root {
+  :root,
+  [data-campaign="black-friday"] {
     --surface-canvas: var(--bf-light-canvas);
     --surface-subtle: var(--bf-light-subtle);
     --text-primary: var(--bf-light-text);
     --accent-primary: var(--bf-light-accent);
-    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
     --radius-card: var(--bf-radius);
   }
 
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root,
+    [data-campaign="black-friday"] {
       --surface-canvas: var(--bf-dark-canvas);
       --surface-subtle: var(--bf-dark-subtle);
       --text-primary: var(--bf-dark-text);

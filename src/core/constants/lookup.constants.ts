@@ -37,10 +37,16 @@ export const CAMPAIGN_THEMES = {
 export type CampaignTheme =
   (typeof CAMPAIGN_THEMES)[keyof typeof CAMPAIGN_THEMES];
 
+export const CAMPAIGN_THEME_LABELS: Record<CampaignTheme, string> = {
+  [CAMPAIGN_THEMES.BLACK_FRIDAY]: "Black Friday",
+  [CAMPAIGN_THEMES.CHRISTMAS]: "Christmas",
+  [CAMPAIGN_THEMES.JULY_4]: "4th of July",
+};
+
 export const CAMPAIGN_LABELS: Record<CampaignTheme, string> = {
-  [CAMPAIGN_THEMES.BLACK_FRIDAY]: "Black Friday · Live Retail",
-  [CAMPAIGN_THEMES.CHRISTMAS]: "Holiday Season · Editorial",
-  [CAMPAIGN_THEMES.JULY_4]: "4th of July · Summer Retail",
+  [CAMPAIGN_THEMES.BLACK_FRIDAY]: "Live Retail",
+  [CAMPAIGN_THEMES.CHRISTMAS]: "Holiday Season",
+  [CAMPAIGN_THEMES.JULY_4]: "Summer Retail",
 };
 
 export const CAMPAIGN_PRESET_PROMPTS: Record<CampaignTheme, string[]> = {

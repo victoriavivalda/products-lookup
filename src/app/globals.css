@@ -2,12 +2,16 @@
 
 @import "tailwindcss";
 @import "../styles/1-repository.css";
-@import "../styles/themes/theme-black-friday.css"; /* <-- Cambia este import para cambiar toda la estética */
+@import "../styles/themes/theme-black-friday.css";
+@import "../styles/themes/theme-christmas.css";
+@import "../styles/themes/theme-july4.css";
 @import "../styles/2-facade.css";
 
-body {
-  background-color: var(--surface-canvas);
-  color: var(--text-primary);
-  font-size: var(--fluid-body);
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  body {
+    background-color: var(--surface-canvas);
+    color: var(--text-primary);
+    font-size: var(--fluid-body);
+    -webkit-font-smoothing: antialiased;
+  }
 }

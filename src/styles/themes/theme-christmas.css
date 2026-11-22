@@ -1,15 +1,14 @@
 @layer base {
-  :root {
+  [data-campaign="christmas"] {
     --surface-canvas: var(--xmas-light-canvas);
     --surface-subtle: var(--xmas-light-subtle);
     --text-primary: var(--xmas-light-text);
     --accent-primary: var(--xmas-light-accent);
-    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
     --radius-card: var(--xmas-radius);
   }
 
   @media (prefers-color-scheme: dark) {
-    :root {
+    [data-campaign="christmas"] {
       --surface-canvas: var(--xmas-dark-canvas);
       --surface-subtle: var(--xmas-dark-subtle);
       --text-primary: var(--xmas-dark-text);

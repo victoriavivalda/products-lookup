@@ -12,11 +12,7 @@ export function useCampaignTheme(
   const [campaign, setCampaign] = useState<CampaignTheme>(initialTheme);
 
   useEffect(() => {
-    if (campaign === CAMPAIGN_THEMES.BLACK_FRIDAY) {
-      document.documentElement.removeAttribute(UI_CONFIG.DOM_THEME_ATTRIBUTE);
-    } else {
       document.documentElement.setAttribute(UI_CONFIG.DOM_THEME_ATTRIBUTE, campaign);
-    }
   }, [campaign]);
 
   return { campaign, setCampaign, label: CAMPAIGN_LABELS[campaign] };

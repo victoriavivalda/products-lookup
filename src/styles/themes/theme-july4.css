@@ -1,15 +1,14 @@
 @layer base {
-  :root {
+  [data-campaign="july4"] {
     --surface-canvas: var(--july4-light-canvas);
     --surface-subtle: var(--july4-light-subtle);
     --text-primary: var(--july4-light-text);
     --accent-primary: var(--july4-light-accent);
-    --accent-surface: color-mix(in oklch, var(--accent-primary) 9%, transparent);
     --radius-card: var(--july4-radius);
   }
 
   @media (prefers-color-scheme: dark) {
-    :root {
+    [data-campaign="july4"] {
       --surface-canvas: var(--july4-dark-canvas);
       --surface-subtle: var(--july4-dark-subtle);
       --text-primary: var(--july4-dark-text);

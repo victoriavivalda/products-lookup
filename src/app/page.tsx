@@ -10,6 +10,7 @@ import {
 import { useCampaignTheme } from "@/features/lookup/hooks/use-campaign-theme";
 import { useMultiEngineLookup } from "@/features/lookup/hooks/use-multi-engine-lookup";
 import { TopNavBar } from "@/features/lookup/components/TopNavBar";
+import { Footer } from "@/features/lookup/components/Footer";
 import { SearchCommandBar } from "@/features/lookup/components/SearchCommandBar";
 import { ExecutiveSummaryCard } from "@/features/lookup/components/ExecutiveSummaryCard";
 import { ProviderResultColumn } from "@/features/lookup/components/ProviderResultColumn";
@@ -44,20 +45,18 @@ export default function ProductsLookupPage() {
   };
 
   return (
-    <div className="min-h-screen transition-colors duration-200">
-      <main className="mx-auto max-w-6xl px-6 py-10 md:py-14">
+    <div className="flex min-h-screen flex-col transition-colors duration-200">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-6 pt-10 md:pt-14">
         <TopNavBar
           campaign={campaign}
           campaignLabel={label}
           onSelectCampaign={setCampaign}
-          scenario={scenario}
-          onSelectScenario={setScenario}
         />
 
         <p className="sr-only" aria-live="polite">
-        {hasActiveQuery
-          ? `${completedResponses.length} of ${totalEngines} AI search engines loaded.`
-          : "Ready for product search."}
+          {hasActiveQuery
+            ? `${completedResponses.length} of ${totalEngines} AI search engines loaded.`
+            : "Ready for product search."}
         </p>
 
         <header className="mb-8 max-w-2xl space-y-2.5">
@@ -80,33 +79,37 @@ export default function ProductsLookupPage() {
           onSubmit={setSubmittedQuery}
         />
 
-        {!hasActiveQuery ? (
-          <EmptyLookupState
-            presets={activePresets}
-            onSelectPreset={handleSelectPreset}
-          />
-        ) : (
-          <>
-            <ExecutiveSummaryCard
-              conclusion={conclusion}
-              responses={completedResponses}
-              totalEngines={totalEngines}
+        <div className="flex-1">
+          {!hasActiveQuery ? (
+            <EmptyLookupState
+              presets={activePresets}
+              onSelectPreset={handleSelectPreset}
             />
+          ) : (
+            <>
+              <ExecutiveSummaryCard
+                conclusion={conclusion}
+                responses={completedResponses}
+                totalEngines={totalEngines}
+              />
 
-            <div className="mb-8 grid gap-6 lg:grid-cols-3">
-              {engineSlots.map(({ adapter, queryState }) => (
-                <ProviderResultColumn
-                  key={adapter.modelId}
-                  adapter={adapter}
-                  queryState={queryState}
-                />
-              ))}
-            </div>
+              <div className="mb-8 grid gap-6 lg:grid-cols-3">
+                {engineSlots.map(({ adapter, queryState }) => (
+                  <ProviderResultColumn
+                    key={adapter.modelId}
+                    adapter={adapter}
+                    queryState={queryState}
+                  />
+                ))}
+              </div>
 
-            <EngineTelemetryChart responses={completedResponses} />
-            <VisibilityMatrixChart responses={completedResponses} />
-          </>
-        )}
+              <EngineTelemetryChart responses={completedResponses} />
+              <VisibilityMatrixChart responses={completedResponses} />
+            </>
+          )}
+        </div>
+
+        <Footer scenario={scenario} onSelectScenario={setScenario} />
       </main>
     </div>
   );
