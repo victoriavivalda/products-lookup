@@ -103,8 +103,12 @@ export function ExecutiveSummaryCard({
               </span>
             </div>
 
-            <p className="font-mono text-xs leading-relaxed text-[var(--text-primary)]">
-              {streamedText || conclusion.recommendedAction}
+          <p
+            aria-live="polite"
+            aria-busy={isStreaming}
+            className="font-mono text-xs leading-relaxed text-[var(--text-primary)]"
+          >
+            {streamedText || conclusion.recommendedAction}
               {isStreaming && (
                 <span
                   aria-hidden="true"

@@ -61,13 +61,19 @@ export function TopNavBar({
       {/* Borderless Editorial Controls */}
       <div className="flex items-center gap-5 font-mono text-xs">
         {/* Clean Underline Campaign Tabs */}
-        <div className="flex items-center gap-5">
+        <div
+          role="tablist"
+          aria-label="Seasonal retail campaign theme"
+          className="flex items-center gap-5"
+        >
           {CAMPAIGN_OPTIONS.map((theme) => {
             const active = campaign === theme;
             return (
               <button
                 key={theme}
                 type="button"
+                role="tab"
+                aria-selected={active}
                 onClick={() => onSelectCampaign(theme)}
                 className={`relative py-1 transition-colors ${
                   active

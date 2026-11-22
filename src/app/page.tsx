@@ -54,6 +54,12 @@ export default function ProductsLookupPage() {
           onSelectScenario={setScenario}
         />
 
+        <p className="sr-only" aria-live="polite">
+        {hasActiveQuery
+          ? `${completedResponses.length} of ${totalEngines} AI search engines loaded.`
+          : "Ready for product search."}
+        </p>
+
         <header className="mb-8 max-w-2xl space-y-2.5">
           <h1
             className="font-semibold leading-[1.15] tracking-[-0.025em]"

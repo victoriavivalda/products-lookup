@@ -66,6 +66,11 @@
     border: 1px solid color-mix(in oklch, var(--accent-primary) 25%, transparent);
   }
 
+  :focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+  }
+
   @keyframes pl-shimmer {
     0% {
       background-position: -200% 0;
