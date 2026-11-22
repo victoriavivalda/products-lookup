@@ -1,4 +1,8 @@
-import { AIModelId, ExecutionForceMode } from "../constants/lookup.constants";
+import {
+  AIModelId,
+  CampaignTheme,
+  ExecutionForceMode,
+} from "../constants/lookup.constants";
 
 export type { AIModelId };
 
@@ -36,6 +40,7 @@ export interface LookupRequestPayload {
   modelId: AIModelId;
   query: string;
   forceMode?: ExecutionForceMode;
+  campaign?: CampaignTheme;
 }
 
 export interface LookupErrorResponse {

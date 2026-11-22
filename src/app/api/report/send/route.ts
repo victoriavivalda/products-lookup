@@ -14,6 +14,7 @@ interface SendReportRequest {
   email?: string;
   conclusion?: ExecutiveConclusion;
   responses?: AIProviderResponse[];
+  narrative?: string;
 }
 
 export async function POST(
@@ -32,7 +33,8 @@ export async function POST(
     const result = await dispatchExecutiveReport(
       body.email.trim(),
       body.conclusion,
-      body.responses ?? []
+      body.responses ?? [],
+      body.narrative
     );
     return NextResponse.json(result);
   } catch (error) {

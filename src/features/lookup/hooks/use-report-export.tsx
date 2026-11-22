@@ -12,7 +12,8 @@ import { ExecutiveReportPDF } from "@/components/report/ExecutiveReportPDF";
 
 export function useReportExport(
   conclusion: ExecutiveConclusion,
-  responses: AIProviderResponse[]
+  responses: AIProviderResponse[],
+  narrative?: string
 ) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isEmailFormOpen, setIsEmailFormOpen] = useState(false);
@@ -24,7 +25,11 @@ export function useReportExport(
     setIsDownloading(true);
     try {
       const blob = await pdf(
-        <ExecutiveReportPDF conclusion={conclusion} responses={responses} />
+        <ExecutiveReportPDF
+          conclusion={conclusion}
+          responses={responses}
+          narrative={narrative}
+        />
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -67,6 +72,7 @@ export function useReportExport(
           email: email.trim(),
           conclusion,
           responses,
+          narrative,
         }),
       });
 

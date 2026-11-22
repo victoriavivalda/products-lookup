@@ -116,9 +116,11 @@ const styles = StyleSheet.create({
 export function ExecutiveReportPDF({
   conclusion,
   responses,
+  narrative,
 }: {
   conclusion: ExecutiveConclusion;
   responses: AIProviderResponse[];
+  narrative?: string;
 }) {
   const { engineMetrics, visibilitySeries, totalEngines } =
     buildAuditTelemetryViewModel(responses);
@@ -135,16 +137,16 @@ export function ExecutiveReportPDF({
           {`Prompt: "${conclusion.query}" · Generated: ${conclusion.generatedAt}`}
         </Text>
 
-        {/* 1. Executive Conclusions */}
+        {/* 1. Executive Conclusions & AI Narrative */}
         <View style={styles.section} wrap={false}>
-          <Text style={styles.sectionTitle}>Key Findings & Recommended Action</Text>
+          <Text style={styles.sectionTitle}>Key Findings & AI Executive Synthesis</Text>
           {conclusion.insights.map((item, idx) => (
             <Text key={idx} style={styles.bullet}>
               {`• ${item}`}
             </Text>
           ))}
-          <Text style={{ marginTop: 6, fontWeight: "bold" }}>
-            {`Action: ${conclusion.recommendedAction}`}
+          <Text style={{ marginTop: 6, fontWeight: "bold", lineHeight: 1.4 }}>
+            {narrative?.trim() || `Action: ${conclusion.recommendedAction}`}
           </Text>
         </View>
 

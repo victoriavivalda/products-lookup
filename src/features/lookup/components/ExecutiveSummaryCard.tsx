@@ -1,9 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, CheckCircle2, AlertTriangle, Layers } from "lucide-react";
+import { Sparkles, CheckCircle2, AlertTriangle, Layers, Radio } from "lucide-react";
 import { AIProviderResponse, ExecutiveConclusion } from "@/core/domain/lookup.types";
 import { ReportActions } from "@/components/report/ReportActions";
+import { useExecutiveStream } from "@/features/lookup/hooks/use-executive-stream";
 
 interface ExecutiveSummaryCardProps {
   conclusion: ExecutiveConclusion | null;
@@ -16,6 +17,7 @@ export function ExecutiveSummaryCard({
   responses,
   totalEngines,
 }: ExecutiveSummaryCardProps) {
+  const { streamedText, isStreaming } = useExecutiveStream(conclusion, responses);
   return (
     <AnimatePresence mode="wait">
       {conclusion && (
@@ -37,7 +39,7 @@ export function ExecutiveSummaryCard({
               </h2>
             </div>
 
-            <ReportActions conclusion={conclusion} responses={responses} />
+            <ReportActions conclusion={conclusion} responses={responses} narrative={streamedText} />
           </div>
 
           {/* KPI Strip */}
@@ -88,10 +90,29 @@ export function ExecutiveSummaryCard({
             ))}
           </ul>
 
-          {/* Action Banner */}
-          <div className="rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-canvas)] p-3.5 font-mono text-xs leading-relaxed text-[var(--text-muted)]">
-            <strong className="text-[var(--text-primary)]">Recommended Action:</strong>{" "}
-            {conclusion.recommendedAction}
+
+          {/* Live AI Stream Synthesis */}
+          <div className="rounded-lg border border-[var(--border-hairline)] bg-[var(--surface-canvas)] p-3.5 space-y-2">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+              <Radio
+                className={`h-3 w-3 ${isStreaming ? "animate-pulse" : ""}`}
+                style={{ color: "var(--accent-primary)" }}
+              />
+              <span>
+                {isStreaming ? "Streaming AI Synthesis..." : "AI Executive Synthesis"}
+              </span>
+            </div>
+
+            <p className="font-mono text-xs leading-relaxed text-[var(--text-primary)]">
+              {streamedText || conclusion.recommendedAction}
+              {isStreaming && (
+                <span
+                  aria-hidden="true"
+                  className="ml-1 inline-block h-3.5 w-1.5 animate-pulse align-middle"
+                  style={{ backgroundColor: "var(--accent-primary)" }}
+                />
+              )}
+            </p>
           </div>
         </motion.section>
       )}

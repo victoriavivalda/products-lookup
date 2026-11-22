@@ -23,12 +23,15 @@ export class EmailDispatchError extends Error {
 
 function buildCompactEmailHtml(
   conclusion: ExecutiveConclusion,
-  totalEngines: number
+  totalEngines: number,
+  narrative?: string
 ): string {
   const driftLabel =
     conclusion.priceDiscrepanciesCount === 0
       ? "0 detected"
       : `${conclusion.priceDiscrepanciesCount} flagged`;
+
+  const executiveSummary = narrative?.trim() || conclusion.recommendedAction;
 
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 540px; color: #111827; line-height: 1.5;">
@@ -55,7 +58,7 @@ function buildCompactEmailHtml(
       </table>
 
       <div style="background: #f9fafb; padding: 12px 14px; border-radius: 8px; border: 1px solid #e5e7eb; font-size: 12.5px; margin-bottom: 14px;">
-        <strong>Next Step:</strong> ${conclusion.recommendedAction}
+        <strong>AI Synthesis & Action:</strong> ${executiveSummary}
       </div>
 
       <p style="font-size: 11.5px; color: #6b7280; margin: 0;">
@@ -68,13 +71,18 @@ function buildCompactEmailHtml(
 export async function dispatchExecutiveReport(
   recipient: string,
   conclusion: ExecutiveConclusion,
-  responses: AIProviderResponse[] = []
+  responses: AIProviderResponse[] = [],
+  narrative?: string
 ): Promise<DispatchReportResult> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
 
   if (apiKey) {
     const pdfBuffer = await renderToBuffer(
-      <ExecutiveReportPDF conclusion={conclusion} responses={responses} />
+      <ExecutiveReportPDF
+        conclusion={conclusion}
+        responses={responses}
+        narrative={narrative}
+      />
     );
 
     const resend = new Resend(apiKey);
@@ -82,7 +90,7 @@ export async function dispatchExecutiveReport(
       from: "Products Lookup <onboarding@resend.dev>",
       to: recipient,
       subject: `AI Shelf Brief: ${conclusion.query}`,
-      html: buildCompactEmailHtml(conclusion, responses.length),
+      html: buildCompactEmailHtml(conclusion, responses.length, narrative),
       attachments: [
         {
           filename: `products-lookup-audit-${Date.now()}.pdf`,

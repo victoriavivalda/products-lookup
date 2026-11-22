@@ -8,9 +8,14 @@ import { useReportExport } from "@/features/lookup/hooks/use-report-export";
 interface ReportActionsProps {
   conclusion: ExecutiveConclusion;
   responses: AIProviderResponse[];
+  narrative?: string;
 }
 
-export function ReportActions({ conclusion, responses }: ReportActionsProps) {
+export function ReportActions({
+  conclusion,
+  responses,
+  narrative,
+}: ReportActionsProps) {
   const {
     isDownloading,
     downloadPdf,
@@ -22,7 +27,7 @@ export function ReportActions({ conclusion, responses }: ReportActionsProps) {
     status,
     errorMessage,
     sendEmail,
-  } = useReportExport(conclusion, responses);
+  } = useReportExport(conclusion, responses, narrative);
 
   const submitButtonLabel =
     status === EMAIL_DISPATCH_STATUS.SENT
