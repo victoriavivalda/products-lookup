@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, CheckCircle2, Eye } from "lucide-react";
 import { AIProviderResponse } from "@/core/domain/lookup.types";
-import { buildVisibilitySeries } from "./visibility-matrix.utils";
+import { buildVisibilitySeries } from "@/core/facades/presenters/visibility-matrix.presenters";
 import { MatrixBumpSvg } from "./MatrixBumpSvg";
 import { ProductLegendBar } from "./ProductLegendBar";
 

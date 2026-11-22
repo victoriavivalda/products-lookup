@@ -3,7 +3,7 @@ import {
   AIProviderResponse,
   ExecutiveConclusion,
 } from "@/core/domain/lookup.types";
-import { buildAuditTelemetryViewModel } from "@/core/facades/telemetry.presenter";
+import { buildAuditTelemetryViewModel } from "@/core/facades/presenters/telemetry.presenter";
 import { pdfStyles } from "./pdf.styles";
 import { TrajectorySvgSection } from "./TrajectorySvgSection";
 import { ProviderBreakdownSection } from "./ProviderBreakdownSection";

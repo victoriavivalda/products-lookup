@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Activity } from "lucide-react";
 import { AIProviderResponse } from "@/core/domain/lookup.types";
-import { buildAuditTelemetryViewModel } from "@/core/facades/telemetry.presenter";
+import { buildAuditTelemetryViewModel } from "@/core/facades/presenters/telemetry.presenter";
 
 interface EngineTelemetryChartProps {
   responses: AIProviderResponse[];

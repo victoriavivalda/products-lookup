@@ -3,7 +3,7 @@ import { AIProviderResponse } from "@/core/domain/lookup.types";
 import {
   buildVisibilitySeries,
   ProductSeries,
-} from "@/features/lookup/components/visibility-matrix/visibility-matrix.utils";
+} from "@/core/facades/presenters/visibility-matrix.presenters";
 
 export interface EngineTelemetryMetric {
   readonly modelId: AIModelId;

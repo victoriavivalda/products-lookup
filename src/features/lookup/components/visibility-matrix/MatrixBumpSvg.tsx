@@ -8,7 +8,7 @@ import {
   getRankRowY,
   MATRIX_CONFIG,
   ProductSeries,
-} from "./visibility-matrix.utils";
+} from "@/core/facades/presenters/visibility-matrix.presenters";
 
 interface MatrixBumpSvgProps {
   seriesList: ProductSeries[];

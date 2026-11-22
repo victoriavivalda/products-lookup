@@ -3,7 +3,7 @@ import {
   buildSmoothBezierPath,
   getEngineColumnX,
   getRankRowY,
-} from "./visibility-matrix.utils";
+} from "./visibility-matrix.presenters";
 
 describe("visibility-matrix SVG geometry utils", () => {
   it("calculates monotonically increasing X coordinates across engine columns", () => {

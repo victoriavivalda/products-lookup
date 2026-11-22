@@ -6,7 +6,7 @@ import {
   getRankRowY,
   MATRIX_CONFIG,
   ProductSeries,
-} from "@/features/lookup/components/visibility-matrix/visibility-matrix.utils";
+} from "@/core/facades/presenters/visibility-matrix.presenters";
 import { PDF_COLORS, pdfStyles } from "./pdf.styles";
 
 interface TrajectorySvgSectionProps {

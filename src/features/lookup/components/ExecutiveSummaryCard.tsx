@@ -13,7 +13,7 @@ import {
   AIProviderResponse,
   ExecutiveConclusion,
 } from "@/core/domain/lookup.types";
-import { ReportActions } from "@/components/report/ReportActions";
+import { ReportActions } from "@/features/lookup/components/ReportActions";
 import { useExecutiveStream } from "@/features/lookup/hooks/use-executive-stream";
 
 interface ExecutiveSummaryCardProps {
