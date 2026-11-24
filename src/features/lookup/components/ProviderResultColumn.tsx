@@ -1,7 +1,7 @@
 import { UseQueryResult } from "@tanstack/react-query";
 import { AIProviderResponse } from "@/core/domain/lookup.types";
 import { CitationItemCard } from "./CitationItemCard";
-import { AIProviderStrategy } from "@/core/adapters/ai-provider.strategy";
+import { AIProviderStrategy } from "@/core/providers/ai-provider.strategy";
 
 interface ProviderResultColumnProps {
   adapter: AIProviderStrategy;

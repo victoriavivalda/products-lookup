@@ -1,4 +1,4 @@
-import { resolveProviderApiKey } from "@/core/adapters/server/live-provider.registry";
+import { resolveProviderApiKey } from "@/core/providers/server/live-provider.registry";
 import {
   AI_MODEL_LABELS,
   AI_MODELS,

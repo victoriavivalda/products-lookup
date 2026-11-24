@@ -18,7 +18,7 @@ import {
 import {
   LIVE_PROVIDER_REGISTRY,
   resolveProviderApiKey,
-} from "@/core/adapters/server/live-provider.registry";
+} from "@/core/providers/server/live-provider.registry";
 import { buildDynamicMockCitations } from "@/core/repositories/dynamic-catalog.repo";
 
 const SIMULATED_LATENCY_MS: Record<AIModelId, number> = {

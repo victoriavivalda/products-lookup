@@ -13,7 +13,7 @@ import {
 import {
   LIVE_PROVIDER_REGISTRY,
   RawCitation,
-} from "@/core/adapters/server/live-provider.registry";
+} from "@/core/providers/server/live-provider.registry";
 import { performServerLookup } from "./server-lookup.facade";
 
 const SAMPLE_RAW_CITATIONS: RawCitation[] = Array.of<RawCitation>({

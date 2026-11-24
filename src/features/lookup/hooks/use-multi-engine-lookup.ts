@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { lookupFacade } from "@/core/facades/lookup.facade";
-import { SimulationDecoratorStrategy } from "@/core/adapters/simulation-decorator.strategy";
+import { SimulationDecoratorStrategy } from "@/core/providers/simulation-decorator.strategy";
 import { AIProviderResponse } from "@/core/domain/lookup.types";
 import {
   CampaignTheme,

@@ -1,5 +1,5 @@
-import { AIProviderFactory } from "@/core/adapters/ai-provider.factory";
-import { AIProviderStrategy } from "@/core/adapters/ai-provider.strategy";
+import { AIProviderFactory } from "@/core/providers/ai-provider.factory";
+import { AIProviderStrategy } from "@/core/providers/ai-provider.strategy";
 import {
   AIProviderResponse,
   ExecutiveConclusion,
