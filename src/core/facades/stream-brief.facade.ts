@@ -25,13 +25,9 @@ const STREAM_TIMEOUT_MS = 8_000;
 const FALLBACK_WORD_DELAY_MS = 28;
 
 const STREAM_ENDPOINTS = {
-  GEMINI: [
-    "https://",
-    "://googleapis.com",
-    "/v1beta/models/gemini-flash-lite-latest:streamGenerateContent?alt=sse",
-  ].join(""),
-  OPENAI: ["https://", "api.openai.com", "/v1/chat/completions"].join(""),
-  ANTHROPIC: ["https://", "api.anthropic.com", "/v1/messages"].join(""),
+  GEMINI: "https://googleapis.com/v1beta/models/gemini-flash-lite-latest:streamGenerateContent?alt=sse",
+  OPENAI: "https://api.openai.com/v1/chat/completions",
+  ANTHROPIC: "https://api.anthropic.com/v1/messages",
 } as const;
 
 function buildBriefPrompt(
